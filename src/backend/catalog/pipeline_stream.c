@@ -662,11 +662,15 @@ GetInferredStreamTupleDesc(Oid relid, List *colnames)
 bool
 RangeVarIsForStream(RangeVar *rv, bool *is_inferred)
 {
-	Relation rel = heap_openrv(rv, NoLock);
+	/* We need to allow missing relations here, otherwise initdb fails. */
+	Relation rel = heap_openrv_extended(rv, NoLock, true);
 	char relkind;
 	Oid relid;
 	HeapTuple tup;
 	Form_pipeline_stream row;
+
+	if (rel == NULL)
+		return false;
 
 	relkind = rel->rd_rel->relkind;
 	relid = rel->rd_id;

@@ -270,7 +270,12 @@ collect_rels_and_streams(Node *node, ContAnalyzeContext *context)
 
 	if (IsA(node, RangeVar))
 	{
-		if (RangeVarIsForStream((RangeVar *) node, NULL))
+		RangeVar *rv = (RangeVar *) node;
+		Relation rel = heap_openrv(rv, NoLock);
+
+		heap_close(rel, NoLock);
+
+		if (RangeVarIsForStream(rv, NULL))
 			context->streams = lappend(context->streams, node);
 		else
 			context->rels = lappend(context->rels, node);
