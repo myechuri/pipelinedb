@@ -74,6 +74,7 @@ CREATE FUNCTION
   $BODY$
 LANGUAGE plpgsql;
 -- json_agg
+CREATE STREAM cqobjectagg_stream ();
 CREATE CONTINUOUS VIEW test_json_agg AS SELECT key::text, json_agg(tval::text) AS j0, json_agg(fval::float8) AS j1, json_agg(ival::integer) AS j2 FROM cqobjectagg_stream GROUP BY key;
 INSERT INTO cqobjectagg_stream (key, tval, fval, ival) VALUES ('x', 'text', 0.01, 42), ('x', 'more text', 0.01, 42), ('x', 'blaahhhh', 0.01, 42);
 INSERT INTO cqobjectagg_stream (key, tval, fval, ival) VALUES ('y', '4.2', 1.01, 42), ('z', '\"quoted\"', 2.01, 42), ('x', '', 0.01, 42), ('z', '2', '3', '4');
@@ -126,8 +127,10 @@ SELECT key, array_sort(json_to_array(j2)) FROM test_json_agg ORDER BY key;
  z   | {4,42,42}
 (3 rows)
 
-DROP CONTINUOUS VIEW test_json_agg;
+DROP STREAM cqobjectagg_stream CASCADE;
+NOTICE:  drop cascades to continuous view test_json_agg
 -- json_object_agg
+CREATE STREAM cqobjectagg_stream ();
 CREATE CONTINUOUS VIEW test_object_agg0 AS SELECT n, json_object_agg(n::text, v::integer) FROM cqobjectagg_stream GROUP BY n;
 CREATE CONTINUOUS VIEW test_object_agg1 AS SELECT n, json_object_agg(n::text, t::text) FROM cqobjectagg_stream GROUP BY n;
 INSERT INTO cqobjectagg_stream (n, v, t) VALUES ('k0', 1, '1');
@@ -174,9 +177,13 @@ SELECT n, array_sort(json_keys_array(json_object_agg)) FROM test_object_agg1 ORD
  k3 | {k3,k3}
 (4 rows)
 
-DROP CONTINUOUS VIEW test_object_agg0;
-DROP CONTINUOUS VIEW test_object_agg1;
+DROP STREAM cqobjectagg_stream CASCADE;
+NOTICE:  drop cascades to 2 other objects
+DETAIL:  drop cascades to continuous view test_object_agg0
+drop cascades to continuous view test_object_agg1
 -- bytea_string_agg, string_agg
+CREATE STREAM cqobjectagg_stream ();
+CREATE STREAM cqobjectagg_text_stream ();
 CREATE CONTINUOUS VIEW test_bstring_agg AS SELECT k::text, string_agg(v::bytea, '@') FROM cqobjectagg_stream GROUP by k;
 CREATE CONTINUOUS VIEW test_string_agg AS SELECT k::text, string_agg(v::text, '@') FROM cqobjectagg_text_stream GROUP by k;
 INSERT INTO cqobjectagg_stream (k, v) VALUES ('x', 'val0'), ('x', 'val1');
@@ -217,9 +224,12 @@ SELECT k, array_sort(regexp_split_to_array(string_agg, '@')) FROM test_string_ag
  z | {val4}
 (3 rows)
 
-DROP CONTINUOUS VIEW test_bstring_agg;
-DROP CONTINUOUS VIEW test_string_agg;
+DROP STREAM cqobjectagg_stream CASCADE;
+NOTICE:  drop cascades to continuous view test_bstring_agg
+DROP STREAM cqobjectagg_text_stream CASCADE;
+NOTICE:  drop cascades to continuous view test_string_agg
 -- array_agg
+CREATE STREAM cqobjectagg_stream ();
 CREATE CONTINUOUS VIEW test_array_agg AS SELECT k::text, array_agg(v::integer) FROM cqobjectagg_stream GROUP BY k;
 \d+ test_array_agg_mrel0
                    Table "public.test_array_agg_mrel0"
@@ -265,7 +275,8 @@ SELECT array_sort(array_agg) FROM test_array_agg;
  {cat,hello,lol,world}
 (1 row)
 
-DROP CONTINUOUS VIEW test_array_agg;
+DROP STREAM cqobjectagg_stream CASCADE;
+NOTICE:  drop cascades to continuous view test_array_agg
 DROP FUNCTION array_sort(anyarray);
 DROP FUNCTION json_to_array(json);
 DROP FUNCTION json_keys_array(json);

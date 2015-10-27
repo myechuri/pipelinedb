@@ -1,3 +1,4 @@
+CREATE STREAM sw_minmax_stream ();
 CREATE CONTINUOUS VIEW test_sw_min_max AS SELECT
 key::text,
 min(i8::int8) AS i8min, max(i8) AS i8max,
@@ -71,4 +72,5 @@ SELECT key, intervalmax, txtmin, txtmax, nmin, nmax, amin, amax FROM test_sw_min
  y   | @ 366 days  | fourth row | third row  | -0.00000000041 | 1.00000000042 | {-10}    | {-1,0,1}
 (2 rows)
 
-DROP CONTINUOUS VIEW test_sw_min_max;
+DROP STREAM sw_minmax_stream CASCADE;
+NOTICE:  drop cascades to continuous view test_sw_min_max

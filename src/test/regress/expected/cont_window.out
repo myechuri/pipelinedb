@@ -1,3 +1,4 @@
+CREATE STREAM cqwindow_stream ();
 CREATE CONTINUOUS VIEW cqwindow0 AS SELECT key::text, SUM(x::numeric) OVER (PARTITION BY key ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING) FROM cqwindow_stream;
 \d+ cqwindow0_mrel0;
                                   Table "public.cqwindow0_mrel0"
@@ -189,8 +190,10 @@ SELECT pipeline_get_worker_querydef('cqwindow4');
    GROUP BY date_round(arrival_timestamp::timestamp with time zone, '@ 3 mins'::interval)
 (1 row)
 
-DROP CONTINUOUS VIEW cqwindow0;
-DROP CONTINUOUS VIEW cqwindow1;
-DROP CONTINUOUS VIEW cqwindow2;
-DROP CONTINUOUS VIEW cqwindow3;
-DROP CONTINUOUS VIEW cqwindow4;
+DROP STREAM cqwindow_stream CASCADE;
+NOTICE:  drop cascades to 5 other objects
+DETAIL:  drop cascades to continuous view cqwindow0
+drop cascades to continuous view cqwindow1
+drop cascades to continuous view cqwindow2
+drop cascades to continuous view cqwindow3
+drop cascades to continuous view cqwindow4

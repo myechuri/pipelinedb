@@ -1,3 +1,4 @@
+CREATE STREAM stream0 ();
 CREATE CONTINUOUS VIEW ps0 AS SELECT id::integer FROM stream0;
 SELECT schema, name, inferred, array_length(queries, 1), "desc" FROM pipeline_streams() ORDER BY name;
  schema |  name   | inferred | array_length |                   desc                   
@@ -13,6 +14,7 @@ SELECT schema, name, inferred, array_length(queries, 1), "desc" FROM pipeline_st
 (1 row)
 
 CREATE CONTINUOUS VIEW ps2 AS SELECT id::float FROM stream0;
+CREATE STREAM stream1 ();
 CREATE CONTINUOUS VIEW ps3 AS SELECT x::integer, y::timestamp FROM stream1;
 SELECT schema, name, inferred, array_length(queries, 1), "desc" FROM pipeline_streams() ORDER BY name;
  schema |  name   | inferred | array_length |                                   desc                                   
@@ -68,19 +70,17 @@ SELECT schema, name, inferred, array_length(queries, 1), "desc" FROM pipeline_st
 
 DROP CONTINUOUS VIEW ps2;
 DROP CONTINUOUS VIEW ps3;
-SELECT schema, name, inferred, array_length(queries, 1), "desc" FROM pipeline_streams() ORDER BY name;
- schema |  name   | inferred | array_length | desc 
---------+---------+----------+--------------+------
- public | stream2 | f        |            1 | 
-(1 row)
-
 DROP CONTINUOUS VIEW ps5;
 SELECT schema, name, inferred, array_length(queries, 1), "desc" FROM pipeline_streams() ORDER BY name;
  schema |  name   | inferred | array_length | desc 
 --------+---------+----------+--------------+------
+ public | stream0 | t        |              | 
+ public | stream1 | t        |              | 
  public | stream2 | f        |              | 
-(1 row)
+(3 rows)
 
+DROP STREAM stream0;
+DROP STREAM stream1;
 DROP STREAM stream2;
 SELECT schema, name, inferred, array_length(queries, 1), "desc" FROM pipeline_streams() ORDER BY name;
  schema | name | inferred | array_length | desc 

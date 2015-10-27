@@ -1,3 +1,4 @@
+CREATE STREAM cont_matrel_stream ();
 CREATE CONTINUOUS VIEW cont_matrel AS SELECT COUNT(*) FROM cont_matrel_stream;
 
 INSERT INTO cont_matrel_stream (x) VALUES (1);
@@ -24,3 +25,5 @@ INSERT INTO cont_matrel_mrel0 (count) VALUES (5);
 SELECT * FROM cont_matrel;
 INSERT INTO cont_matrel_stream (x) VALUES (1);
 SELECT * FROM cont_matrel;
+
+DROP STREAM cont_matrel_stream CASCADE;

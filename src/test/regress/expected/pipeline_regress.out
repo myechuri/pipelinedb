@@ -30,6 +30,7 @@ SELECT foobar, count FROM test_view ORDER BY secondstamp, foobar;
 
 DROP CONTINUOUS VIEW test_view;
 DROP STREAM test_stream;
+CREATE STREAM test_stream ();
 CREATE CONTINUOUS VIEW test_view AS
   SELECT
     user_id::int,
@@ -113,6 +114,7 @@ SELECT * FROM test_view ORDER BY x;
 (3 rows)
 
 DROP CONTINUOUS VIEW test_view;
+CREATE STREAM stream ();
 CREATE CONTINUOUS VIEW test_view AS
 SELECT
   second(arrival_timestamp),
@@ -178,3 +180,5 @@ SELECT * FROM test_view ORDER BY uid;
 
 CREATE CONTINUOUS VIEW v AS SELECT array_agg(ARRAY[x::int, y::int]) FROM stream;
 ERROR:  could not find array type for data type integer[]
+DROP STREAM stream CASCADE;
+NOTICE:  drop cascades to continuous view test_view

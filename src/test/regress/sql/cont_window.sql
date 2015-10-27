@@ -1,3 +1,4 @@
+CREATE STREAM cqwindow_stream ();
 CREATE CONTINUOUS VIEW cqwindow0 AS SELECT key::text, SUM(x::numeric) OVER (PARTITION BY key ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING) FROM cqwindow_stream;
 \d+ cqwindow0_mrel0;
 \d+ cqwindow0;
@@ -44,8 +45,4 @@ SELECT COUNT(*) FROM cqwindow3_mrel0;
 CREATE CONTINUOUS VIEW cqwindow4 AS SELECT COUNT(*) FROM cqwindow_stream WHERE arrival_timestamp > clock_timestamp() - interval '1 hour';
 SELECT pipeline_get_worker_querydef('cqwindow4');
 
-DROP CONTINUOUS VIEW cqwindow0;
-DROP CONTINUOUS VIEW cqwindow1;
-DROP CONTINUOUS VIEW cqwindow2;
-DROP CONTINUOUS VIEW cqwindow3;
-DROP CONTINUOUS VIEW cqwindow4;
+DROP STREAM cqwindow_stream CASCADE;

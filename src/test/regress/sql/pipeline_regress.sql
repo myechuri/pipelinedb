@@ -23,6 +23,7 @@ SELECT foobar, count FROM test_view ORDER BY secondstamp, foobar;
 DROP CONTINUOUS VIEW test_view;
 DROP STREAM test_stream;
 
+CREATE STREAM test_stream ();
 CREATE CONTINUOUS VIEW test_view AS
   SELECT
     user_id::int,
@@ -84,6 +85,7 @@ SELECT * FROM test_view ORDER BY x;
 
 DROP CONTINUOUS VIEW test_view;
 
+CREATE STREAM stream ();
 CREATE CONTINUOUS VIEW test_view AS
 SELECT
   second(arrival_timestamp),
@@ -128,3 +130,5 @@ INSERT INTO stream (uid) VALUES (41950);
 SELECT * FROM test_view ORDER BY uid;
 
 CREATE CONTINUOUS VIEW v AS SELECT array_agg(ARRAY[x::int, y::int]) FROM stream;
+
+DROP STREAM stream CASCADE;

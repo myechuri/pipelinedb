@@ -1,10 +1,13 @@
+CREATE STREAM stream ();
 CREATE CONTINUOUS VIEW test_cvn0 AS SELECT COUNT(*) FROM stream;
 CREATE CONTINUOUS VIEW nonexistent.cv AS SELECT COUNT(*) FROM stream;
 
 CREATE SCHEMA test_cvn_schema0;
+CREATE STREAM test_cvn_schema0.stream ();
 CREATE CONTINUOUS VIEW test_cvn_schema0.test_cvn0 AS SELECT COUNT(*) FROM test_cvn_schema0.stream;
 
 CREATE SCHEMA test_cvn_schema1;
+CREATE STREAM test_cvn_schema1.stream ();
 CREATE CONTINUOUS VIEW test_cvn_schema1.test_cvn0 AS SELECT COUNT(*) FROM test_cvn_schema1.stream;
 
 SELECT n.nspname, pq.name FROM pipeline_query pq JOIN pg_namespace n ON pq.namespace = n.oid WHERE pq.name LIKE '%test_cvn%' ORDER BY n.nspname, pq.name;
@@ -21,14 +24,16 @@ DROP SCHEMA test_cvn_schema0_new CASCADE;
 
 SELECT n.nspname, pq.name FROM pipeline_query pq JOIN pg_namespace n ON pq.namespace = n.oid WHERE pq.name LIKE '%test_cvn%' ORDER BY n.nspname, pq.name;
 
-DROP CONTINUOUS VIEW test_cvn0;
+DROP STREAM stream CASCADE;
 DROP SCHEMA test_cvn_schema1 CASCADE;
 
 SELECT n.nspname, pq.name FROM pipeline_query pq JOIN pg_namespace n ON pq.namespace = n.oid WHERE pq.name LIKE '%test_cvn%' ORDER BY n.nspname, pq.name;
 
+CREATE STREAM test_cvn_stream ();
 CREATE CONTINUOUS VIEW test_cvn0 AS SELECT x::int FROM test_cvn_stream;
 
 CREATE SCHEMA test_cvn_schema0;
+CREATE STREAM test_cvn_schema0.test_cvn_stream ();
 CREATE CONTINUOUS VIEW test_cvn_schema0.test_cvn0 AS SELECT x::int, y::text FROM test_cvn_schema0.test_cvn_stream;
 
 SELECT schema, name, "desc" FROM pipeline_streams() WHERE name='test_cvn_stream' ORDER BY "desc";
@@ -39,5 +44,5 @@ INSERT INTO test_cvn_schema0.test_cvn_stream (x, y) VALUES (2, 2), (3, 3);
 SELECT * FROM test_cvn0;
 SELECT * FROM test_cvn_schema0.test_cvn0 ORDER BY x;
 
-DROP CONTINUOUS VIEW test_cvn0;
+DROP STREAM test_cvn_stream CASCADE;
 DROP SCHEMA test_cvn_schema0 CASCADE;

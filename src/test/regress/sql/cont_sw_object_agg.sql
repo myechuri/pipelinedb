@@ -74,6 +74,7 @@ CREATE FUNCTION
 LANGUAGE plpgsql;
 
 -- json_agg
+CREATE STREAM cqswobjectagg_stream ();
 CREATE CONTINUOUS VIEW test_sw_json_agg AS SELECT key::text, json_agg(tval::text) AS j0, json_agg(fval::float8) AS j1, json_agg(ival::integer) AS j2 FROM cqswobjectagg_stream WHERE arrival_timestamp > clock_timestamp() - interval '60 second' GROUP BY key;
 
 INSERT INTO cqswobjectagg_stream (key, tval, fval, ival) VALUES ('x', 'text', 0.01, 41), ('x', 'more text', 0.02, 42), ('x', 'blaahhhh', 0.03, 43);
@@ -91,9 +92,10 @@ SELECT key, array_sort(json_to_array(j0)) FROM test_sw_json_agg ORDER BY key;
 SELECT key, array_sort(json_to_array(j1)) FROM test_sw_json_agg ORDER BY key;
 SELECT key, array_sort(json_to_array(j2)) FROM test_sw_json_agg ORDER BY key;
 
-DROP CONTINUOUS VIEW test_sw_json_agg;
+DROP STREAM cqswobjectagg_stream CASCADE;
 
 -- json_object_agg
+CREATE STREAM cqswobjectagg_stream ();
 CREATE CONTINUOUS VIEW test_sw_object_agg0 AS SELECT n, json_object_agg(n::text, v::integer) FROM cqswobjectagg_stream WHERE arrival_timestamp > clock_timestamp() - interval '60 second' GROUP BY n;
 CREATE CONTINUOUS VIEW test_sw_object_agg1 AS SELECT n, json_object_agg(n::text, t::text) FROM cqswobjectagg_stream WHERE arrival_timestamp > clock_timestamp() - interval '60 second' GROUP BY n;
 
@@ -115,10 +117,11 @@ INSERT INTO cqswobjectagg_stream (n, v, t) VALUES ('k1', 3, '3');
 SELECT n, array_sort(json_keys_array(json_object_agg)) FROM test_sw_object_agg0 ORDER BY n;
 SELECT n, array_sort(json_keys_array(json_object_agg)) FROM test_sw_object_agg1 ORDER BY n;
 
-DROP CONTINUOUS VIEW test_sw_object_agg0;
-DROP CONTINUOUS VIEW test_sw_object_agg1;
+DROP STREAM cqswobjectagg_stream CASCADE;
 
 -- bytea_string_agg, string_agg
+CREATE STREAM cqswobjectagg_stream ();
+CREATE STREAM cqswobjectagg_text_stream ();
 CREATE CONTINUOUS VIEW test_sw_bstring_agg AS SELECT k::text, string_agg(v::bytea, '@') FROM cqswobjectagg_stream WHERE arrival_timestamp > clock_timestamp() - interval '60 second' GROUP by k;
 CREATE CONTINUOUS VIEW test_sw_string_agg AS SELECT k::text, string_agg(v::text, '@') FROM cqswobjectagg_text_stream WHERE arrival_timestamp > clock_timestamp() - interval '60 second' GROUP by k;
 
@@ -140,10 +143,11 @@ INSERT INTO cqswobjectagg_text_stream (k, v) VALUES ('z', 'val4');
 SELECT k, array_sort(regexp_split_to_array(encode(string_agg, 'escape'), '@')) FROM test_sw_bstring_agg ORDER BY k;
 SELECT k, array_sort(regexp_split_to_array(string_agg, '@')) FROM test_sw_string_agg ORDER BY k;
 
-DROP CONTINUOUS VIEW test_sw_bstring_agg;
-DROP CONTINUOUS VIEW test_sw_string_agg;
+DROP STREAM cqswobjectagg_stream CASCADE;
+DROP STREAM cqswobjectagg_text_stream CASCADE;
 
 -- array_agg
+CREATE STREAM cqswobjectagg_stream ();
 CREATE CONTINUOUS VIEW test_sw_array_agg AS SELECT k::text, array_agg(v::integer) FROM cqswobjectagg_stream WHERE arrival_timestamp > clock_timestamp() - interval '60 second' GROUP BY k;
 
 INSERT INTO cqswobjectagg_stream (k, v) VALUES ('x', 0), ('x', 1), ('x', 2), ('x', 3);
@@ -157,8 +161,7 @@ INSERT INTO cqswobjectagg_stream (k, v) VALUES ('x', 4), ('y', 2), ('z', 10), ('
 
 SELECT k, array_sort(array_agg) FROM test_sw_array_agg ORDER BY k;
 
-DROP CONTINUOUS VIEW test_sw_array_agg;
-
+DROP STREAM cqswobjectagg_stream CASCADE;
 DROP FUNCTION array_sort(anyarray);
 DROP FUNCTION json_to_array(json);
 DROP FUNCTION json_keys_array(json);

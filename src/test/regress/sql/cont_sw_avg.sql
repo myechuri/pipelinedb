@@ -1,5 +1,6 @@
 -------------------------------------------------------------------------------
 -- Integer averages
+CREATE STREAM int_swavg_stream ();
 CREATE CONTINUOUS VIEW test_int8_avg_sw AS SELECT k::text, AVG(v::int8) FROM int_swavg_stream WHERE arrival_timestamp > clock_timestamp() - interval '5 hour' GROUP BY k;
 CREATE CONTINUOUS VIEW test_int4_avg_sw AS SELECT k::text, AVG(v::int4) FROM int_swavg_stream WHERE arrival_timestamp > clock_timestamp() - interval '5 hour' GROUP BY k;
 CREATE CONTINUOUS VIEW test_int2_avg_sw AS SELECT k::text, AVG(v::int2) FROM int_swavg_stream WHERE arrival_timestamp > clock_timestamp() - interval '5 hour' GROUP BY k;
@@ -22,7 +23,7 @@ SELECT * FROM test_int2_avg_sw ORDER BY k;
 
 -------------------------------------------------------------------------------
 -- Float averages
-
+CREATE STREAM float_swavg_stream ();
 CREATE CONTINUOUS VIEW test_float8_avg_sw AS SELECT k::text, AVG(v::float8) FROM float_swavg_stream WHERE arrival_timestamp > clock_timestamp() - interval '5 hour' GROUP BY k;
 CREATE CONTINUOUS VIEW test_float4_avg_sw AS SELECT k::text, AVG(v::float4) FROM float_swavg_stream WHERE arrival_timestamp > clock_timestamp() - interval '5 hour' GROUP BY k;
 
@@ -42,6 +43,7 @@ SELECT k, round(avg::numeric, 5) FROM test_float4_avg_sw ORDER BY k;
 
 -------------------------------------------------------------------------------
 -- Numeric averages
+CREATE STREAM numeric_swavg_stream ();
 CREATE CONTINUOUS VIEW test_numeric_avg_sw AS SELECT k::text, AVG(v::numeric) FROM numeric_swavg_stream WHERE arrival_timestamp > clock_timestamp() - interval '5 hour' GROUP BY k;
 
 INSERT INTO numeric_swavg_stream (k, v) VALUES ('x', 10000000000000000.233), ('x', -1.000000000333), ('x', 0.00000000001);
@@ -57,6 +59,7 @@ SELECT * FROM test_numeric_avg_sw ORDER BY k;
 
 -------------------------------------------------------------------------------
 -- Interval averages
+CREATE STREAM interval_swavg_stream ();
 CREATE CONTINUOUS VIEW test_interval_avg_sw AS SELECT k::text, AVG(date_trunc('day', ts1::timestamp) - date_trunc('day', ts0::timestamp)) FROM interval_swavg_stream WHERE arrival_timestamp > clock_timestamp() - interval '5 hour' GROUP BY k;
 
 INSERT INTO interval_swavg_stream (k, ts0, ts1) VALUES ('x', '2014-01-01 00:00:00', '2014-01-02 23:00:00');
@@ -73,6 +76,7 @@ INSERT INTO interval_swavg_stream (k, ts0, ts1) VALUES ('y', '2014-01-01 23:00:0
 
 SELECT * FROM test_interval_avg_sw ORDER BY k;
 
+CREATE STREAM heart_rates_stream ();
 CREATE CONTINUOUS VIEW avg_heart_rates AS
 SELECT patient_id::integer, avg(value::float) FROM heart_rates_stream
 WHERE description::text = 'HR' AND value > 85
@@ -85,11 +89,8 @@ INSERT INTO heart_rates_stream (patient_id, value, description) VALUES (0, 86, '
 
 SELECT * FROM avg_heart_rates ORDER BY patient_id;
 
-DROP CONTINUOUS VIEW test_int8_avg_sw;
-DROP CONTINUOUS VIEW test_int4_avg_sw;
-DROP CONTINUOUS VIEW test_int2_avg_sw;
-DROP CONTINUOUS VIEW test_float8_avg_sw;
-DROP CONTINUOUS VIEW test_float4_avg_sw;
-DROP CONTINUOUS VIEW test_numeric_avg_sw;
-DROP CONTINUOUS VIEW test_interval_avg_sw;
-DROP CONTINUOUS VIEW avg_heart_rates;
+DROP STREAM int_swavg_stream CASCADE;
+DROP STREAM float_swavg_stream CASCADE;
+DROP STREAM numeric_swavg_stream CASCADE;
+DROP STREAM interval_swavg_stream CASCADE;
+DROP STREAM heart_rates_stream CASCADE;

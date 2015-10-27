@@ -325,35 +325,15 @@ record_dependencies(Oid cvoid, Oid matreloid, Oid viewoid,
 		rv = (RangeVar *) lfirst(lc);
 		relid = RangeVarGetRelid(rv, AccessShareLock, false);
 
-		if (IsInferredStream(relid))
-		{
-			Relation rel = relation_open(relid, NoLock);
-			Oid typid = rel->rd_att->tdtypeid;
+		referenced.classId = RelationRelationId;
+		referenced.objectId = relid;
+		referenced.objectSubId = 0;
 
-			relation_close(rel, NoLock);
+		dependent.classId = RelationRelationId;
+		dependent.objectId = viewoid;
+		dependent.objectSubId = 0;
 
-			referenced.classId = RelationRelationId;
-			referenced.objectId = viewoid;
-			referenced.objectSubId = 0;
-
-			dependent.classId = TypeRelationId;
-			dependent.objectId = typid;
-			dependent.objectSubId = 0;
-
-			recordDependencyOn(&dependent, &referenced, DEPENDENCY_STREAM);
-		}
-		else
-		{
-			referenced.classId = RelationRelationId;
-			referenced.objectId = relid;
-			referenced.objectSubId = 0;
-
-			dependent.classId = RelationRelationId;
-			dependent.objectId = viewoid;
-			dependent.objectSubId = 0;
-
-			recordDependencyOn(&dependent, &referenced, DEPENDENCY_NORMAL);
-		}
+		recordDependencyOn(&dependent, &referenced, DEPENDENCY_NORMAL);
 	}
 
 	recordDependencyOnExpr(&dependent, (Node *) query, NIL, DEPENDENCY_NORMAL);
@@ -417,7 +397,6 @@ ExecCreateContViewStmt(CreateContViewStmt *stmt, const char *querystring)
 
 	pipeline_query = heap_open(PipelineQueryRelationId, ExclusiveLock);
 
-	CreateInferredStreams((SelectStmt *) stmt->query);
 	MakeSelectsContinuous((SelectStmt *) stmt->query);
 
 	/* Apply any CQ storage options like max_age, step_factor */

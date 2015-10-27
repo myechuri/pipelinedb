@@ -1,3 +1,4 @@
+CREATE STREAM cqswcount_stream ();
 CREATE CONTINUOUS VIEW test_count AS SELECT k::text, COUNT(*) FROM cqswcount_stream WHERE arrival_timestamp > clock_timestamp() - interval '60 second' GROUP BY k;
 
 INSERT INTO cqswcount_stream (k) VALUES ('x'), ('x'), ('x'), ('x'), ('x'), ('x');
@@ -28,3 +29,5 @@ SELECT pg_sleep(6);
 
 SELECT * FROM sw_count0;
 SELECT * FROM sw_count1;
+
+DROP STREAM cqswcount_stream CASCADE;

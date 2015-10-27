@@ -4,6 +4,7 @@ CREATE TYPE test_cont_complex_type AS (
   y int,
   z text
 );
+CREATE STREAM cont_complex_stream ();
 CREATE CONTINUOUS VIEW test_cont_complex1 AS SELECT bloom_agg(r::test_cont_complex_type) FROM cont_complex_stream;
 INSERT INTO cont_complex_stream (r) VALUES ((1, 1, 'hello'));
 INSERT INTO cont_complex_stream (r) VALUES ((1, 2, 'world')::test_cont_complex_type);
@@ -135,8 +136,10 @@ SELECT bloom_contains(bloom_agg, 'world') FROM test_cont_complex4;
  t
 (1 row)
 
-DROP CONTINUOUS VIEW test_cont_complex1;
-DROP CONTINUOUS VIEW test_cont_complex2;
-DROP CONTINUOUS VIEW test_cont_complex3;
-DROP CONTINUOUS VIEW test_cont_complex4;
+DROP STREAM cont_complex_stream CASCADE;
+NOTICE:  drop cascades to 4 other objects
+DETAIL:  drop cascades to continuous view test_cont_complex1
+drop cascades to continuous view test_cont_complex2
+drop cascades to continuous view test_cont_complex3
+drop cascades to continuous view test_cont_complex4
 DROP TYPE test_cont_complex_type;

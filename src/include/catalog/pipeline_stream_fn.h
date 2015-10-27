@@ -40,7 +40,6 @@ extern bool RangeVarIsForStream(RangeVar *stream, bool *is_inferred);
 extern bool IsInferredStream(Oid relid);
 extern bool IsStream(Oid relid);
 
-extern void CreateInferredStream(RangeVar *rv);
 extern void CreatePipelineStreamEntry(CreateStreamStmt *stmt, Oid relid);
 extern void RemovePipelineStreamById(Oid oid);
 

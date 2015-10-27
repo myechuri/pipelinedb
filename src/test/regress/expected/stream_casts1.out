@@ -1,3 +1,10 @@
+CREATE STREAM int8_stream ();
+CREATE STREAM int2_stream ();
+CREATE STREAM int4_stream ();
+CREATE STREAM money_stream ();
+CREATE STREAM oid_stream ();
+CREATE STREAM numeric_stream ();
+CREATE STREAM bool_stream ();
 CREATE CONTINUOUS VIEW test_numeric_to_int2 AS SELECT x::numeric FROM numeric_stream;
 CREATE CONTINUOUS VIEW test_numeric_to_int4 AS SELECT x::numeric FROM numeric_stream;
 CREATE CONTINUOUS VIEW test_numeric_to_float4 AS SELECT x::numeric FROM numeric_stream;
@@ -400,28 +407,40 @@ SELECT x FROM test_int8_to_regoper;
  8
 (16 rows)
 
-DROP CONTINUOUS VIEW test_numeric_to_int2;
-DROP CONTINUOUS VIEW test_numeric_to_int4;
-DROP CONTINUOUS VIEW test_numeric_to_float4;
-DROP CONTINUOUS VIEW test_numeric_to_float8;
-DROP CONTINUOUS VIEW test_money_to_numeric;
-DROP CONTINUOUS VIEW test_numeric_to_money;
-DROP CONTINUOUS VIEW test_int4_to_money;
-DROP CONTINUOUS VIEW test_int8_to_money;
-DROP CONTINUOUS VIEW test_int4_to_bool;
-DROP CONTINUOUS VIEW test_bool_to_int4;
-DROP CONTINUOUS VIEW test_int8_to_oid;
-DROP CONTINUOUS VIEW test_int2_to_oid;
-DROP CONTINUOUS VIEW test_int4_to_oid;
-DROP CONTINUOUS VIEW test_oid_to_int8;
-DROP CONTINUOUS VIEW test_oid_to_int4;
-DROP CONTINUOUS VIEW test_oid_to_regproc;
-DROP CONTINUOUS VIEW test_int8_to_regproc;
-DROP CONTINUOUS VIEW test_int2_to_regproc;
-DROP CONTINUOUS VIEW test_int4_to_regproc;
-DROP CONTINUOUS VIEW test_oid_to_regprocedure;
-DROP CONTINUOUS VIEW test_int8_to_regprocedure;
-DROP CONTINUOUS VIEW test_int2_to_regprocedure;
-DROP CONTINUOUS VIEW test_int4_to_regprocedure;
-DROP CONTINUOUS VIEW test_oid_to_regoper;
-DROP CONTINUOUS VIEW test_int8_to_regoper;
+DROP STREAM int2_stream CASCADE;
+NOTICE:  drop cascades to 3 other objects
+DETAIL:  drop cascades to continuous view test_int2_to_oid
+drop cascades to continuous view test_int2_to_regproc
+drop cascades to continuous view test_int2_to_regprocedure
+DROP STREAM int4_stream CASCADE;
+NOTICE:  drop cascades to 5 other objects
+DETAIL:  drop cascades to continuous view test_int4_to_money
+drop cascades to continuous view test_int4_to_bool
+drop cascades to continuous view test_int4_to_oid
+drop cascades to continuous view test_int4_to_regproc
+drop cascades to continuous view test_int4_to_regprocedure
+DROP STREAM int8_stream CASCADE;
+NOTICE:  drop cascades to 5 other objects
+DETAIL:  drop cascades to continuous view test_int8_to_money
+drop cascades to continuous view test_int8_to_oid
+drop cascades to continuous view test_int8_to_regproc
+drop cascades to continuous view test_int8_to_regprocedure
+drop cascades to continuous view test_int8_to_regoper
+DROP STREAM oid_stream CASCADE;
+NOTICE:  drop cascades to 5 other objects
+DETAIL:  drop cascades to continuous view test_oid_to_int8
+drop cascades to continuous view test_oid_to_int4
+drop cascades to continuous view test_oid_to_regproc
+drop cascades to continuous view test_oid_to_regprocedure
+drop cascades to continuous view test_oid_to_regoper
+DROP STREAM money_stream CASCADE;
+NOTICE:  drop cascades to continuous view test_money_to_numeric
+DROP STREAM numeric_stream CASCADE;
+NOTICE:  drop cascades to 5 other objects
+DETAIL:  drop cascades to continuous view test_numeric_to_int2
+drop cascades to continuous view test_numeric_to_int4
+drop cascades to continuous view test_numeric_to_float4
+drop cascades to continuous view test_numeric_to_float8
+drop cascades to continuous view test_numeric_to_money
+DROP STREAM bool_stream CASCADE;
+NOTICE:  drop cascades to continuous view test_bool_to_int4

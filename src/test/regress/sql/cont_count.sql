@@ -1,3 +1,4 @@
+CREATE STREAM stream_cqcount ();
 CREATE CONTINUOUS VIEW test_count AS SELECT k::text, COUNT(*) FROM stream_cqcount GROUP BY k;
 
 INSERT INTO stream_cqcount (k) VALUES ('x'), ('x'), ('x'), ('x'), ('x'), ('x');
@@ -10,4 +11,4 @@ INSERT INTO stream_cqcount (k) VALUES ('x'), ('x'), ('x'), ('x'), ('x'), ('x'), 
 
 SELECT * FROM test_count ORDER BY k;
 
-DROP CONTINUOUS VIEW test_count;
+DROP STREAM sream_cqcount CASCADE;

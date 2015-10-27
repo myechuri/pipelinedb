@@ -19,6 +19,7 @@ INSERT INTO test_stj_t0 (tid, data, val) VALUES (7, '"1"', -6.7);
 
 SELECT pg_sleep(0.1);
 
+CREATE STREAM test_stj_stream ();
 CREATE CONTINUOUS VIEW test_stj0 AS SELECT s.id::integer, t.tid, t.data FROM test_stj_stream s JOIN test_stj_t0 t ON s.id = t.tid;
 CREATE CONTINUOUS VIEW test_stj1 AS SELECT s.id::integer, t.tid, t.data, s.data as jdata FROM test_stj_t0 t JOIN test_stj_stream s ON s.id = t.tid WHERE s.data::jsonb = '[0, 1]';
 CREATE CONTINUOUS VIEW test_stj2 AS SELECT test_stj_stream.id::integer, test_stj_t0.val FROM test_stj_t0, test_stj_stream WHERE test_stj_t0.tid = 0;
@@ -155,6 +156,7 @@ SELECT * FROM test_stj8;
 
 -- Regression test for join with empty table.
 CREATE TABLE test_stj_empty (x int);
+CREATE STREAM test_stj_empty_stream ();
 CREATE CONTINUOUS VIEW test_stj_empty_join AS SELECT test_stj_empty_stream.x::int FROM test_stj_empty_stream JOIN test_stj_empty ON test_stj_empty_stream.x = test_stj_empty.x;
 
 INSERT INTO test_stj_empty_stream (x) VALUES (0);
@@ -181,8 +183,7 @@ SELECT pg_sleep(5);
 
 SELECT * FROM test_stj_sw0;
 
-DROP CONTINUOUS VIEW test_stj_sw0;
-DROP STREAM test_stj_sw0_s;
+DROP STREAM test_stj_sw0_s CASCADE;
 DROP TABLE test_stj_sw0_t;
 
 CREATE TABLE test_stj_t4 (x integer, y integer, z integer);
@@ -192,6 +193,7 @@ BEGIN
 END
 $$
 LANGUAGE plpgsql;
+CREATE STREAM stj_deps_stream ();
 CREATE CONTINUOUS VIEW stj_deps AS SELECT test_stj_foo(s.x::integer), t.x FROM stj_deps_stream s JOIN test_stj_t4 t ON s.x = t.x;
 
 -- Table columns being joined on can't be dropped
@@ -210,17 +212,8 @@ ALTER TABLE test_stj_t4 DROP COLUMN x;
 DROP TABLE test_stj_t4;
 DROP FUNCTION test_stj_foo(integer);
 
-DROP CONTINUOUS VIEW test_stj0;
-DROP CONTINUOUS VIEW test_stj1;
-DROP CONTINUOUS VIEW test_stj2;
-DROP CONTINUOUS VIEW test_stj3;
-DROP CONTINUOUS VIEW test_stj4;
-DROP CONTINUOUS VIEW test_stj5;
-DROP CONTINUOUS VIEW test_stj6;
-DROP CONTINUOUS VIEW test_stj7;
-DROP CONTINUOUS VIEW test_stj8;
-DROP CONTINUOUS VIEW stj_no_tl;
-DROP CONTINUOUS VIEW test_stj_empty_join;
+DROP STREAM test_stj_stream CASCADE;
+DROP STREAM test_stj_empty_stream CASCADE;
 DROP TABLE test_stj_t0;
 DROP TABLE test_stj_t1;
 DROP TABLE test_stj_t2;

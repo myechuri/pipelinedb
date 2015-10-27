@@ -662,14 +662,11 @@ GetInferredStreamTupleDesc(Oid relid, List *colnames)
 bool
 RangeVarIsForStream(RangeVar *rv, bool *is_inferred)
 {
-	Relation rel = heap_openrv_extended(rv, NoLock, true);
+	Relation rel = heap_openrv(rv, NoLock);
 	char relkind;
 	Oid relid;
 	HeapTuple tup;
 	Form_pipeline_stream row;
-
-	if (rel == NULL)
-		return false;
 
 	relkind = rel->rd_rel->relkind;
 	relid = rel->rd_id;
@@ -725,29 +722,6 @@ bool IsStream(Oid relid)
 	heap_close(rel, NoLock);
 
 	return relkind == RELKIND_STREAM;
-}
-
-/*
- * CreateInferredStream
- */
-void
-CreateInferredStream(RangeVar *rv)
-{
-	Oid relid;
-	CreateStreamStmt *stmt;
-
-	stmt = makeNode(CreateStreamStmt);
-	stmt->base.relation = rv;
-	stmt->base.tableElts = NIL;
-	stmt->base.if_not_exists = false;
-	stmt->is_inferred = true;
-
-	transformCreateStreamStmt(stmt);
-
-	relid = DefineRelation((CreateStmt *) stmt,
-							RELKIND_STREAM,
-							InvalidOid);
-	CreatePipelineStreamEntry(stmt, relid);
 }
 
 /*

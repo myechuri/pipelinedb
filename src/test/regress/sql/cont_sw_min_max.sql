@@ -1,3 +1,4 @@
+CREATE STREAM sw_minmax_stream ();
 CREATE CONTINUOUS VIEW test_sw_min_max AS SELECT
 key::text,
 min(i8::int8) AS i8min, max(i8) AS i8max,
@@ -43,4 +44,4 @@ SELECT key, dmin, dmax, tmin, tmax, tzmin, tzmax, mmin FROM test_sw_min_max ORDE
 SELECT key, mmax, tsmin, tsmax, tstzmin, tstzmax, intervalmin FROM test_sw_min_max ORDER BY key;
 SELECT key, intervalmax, txtmin, txtmax, nmin, nmax, amin, amax FROM test_sw_min_max ORDER BY key;
 
-DROP CONTINUOUS VIEW test_sw_min_max;
+DROP STREAM sw_minmax_stream CASCADE;

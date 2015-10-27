@@ -1,9 +1,12 @@
+CREATE STREAM stream ();
 CREATE CONTINUOUS VIEW test_cvn0 AS SELECT COUNT(*) FROM stream;
 CREATE CONTINUOUS VIEW nonexistent.cv AS SELECT COUNT(*) FROM stream;
 ERROR:  schema "nonexistent" does not exist
 CREATE SCHEMA test_cvn_schema0;
+CREATE STREAM test_cvn_schema0.stream ();
 CREATE CONTINUOUS VIEW test_cvn_schema0.test_cvn0 AS SELECT COUNT(*) FROM test_cvn_schema0.stream;
 CREATE SCHEMA test_cvn_schema1;
+CREATE STREAM test_cvn_schema1.stream ();
 CREATE CONTINUOUS VIEW test_cvn_schema1.test_cvn0 AS SELECT COUNT(*) FROM test_cvn_schema1.stream;
 SELECT n.nspname, pq.name FROM pipeline_query pq JOIN pg_namespace n ON pq.namespace = n.oid WHERE pq.name LIKE '%test_cvn%' ORDER BY n.nspname, pq.name;
      nspname      |   name    
@@ -28,12 +31,14 @@ SELECT n.nspname, pq.name FROM pipeline_query pq JOIN pg_namespace n ON pq.names
 
 DROP SCHEMA test_cvn_schema0_new;
 ERROR:  cannot drop schema test_cvn_schema0_new because other objects depend on it
-DETAIL:  continuous view test_cvn_schema0_new.test_cvn0 depends on schema test_cvn_schema0_new
+DETAIL:  type test_cvn_schema0_new.stream depends on schema test_cvn_schema0_new
+continuous view test_cvn_schema0_new.test_cvn0 depends on schema test_cvn_schema0_new
 continuous view test_cvn_schema0_new.test_cvn1 depends on schema test_cvn_schema0_new
 HINT:  Use DROP ... CASCADE to drop the dependent objects too.
 DROP SCHEMA test_cvn_schema0_new CASCADE;
-NOTICE:  drop cascades to 2 other objects
-DETAIL:  drop cascades to continuous view test_cvn_schema0_new.test_cvn0
+NOTICE:  drop cascades to 3 other objects
+DETAIL:  drop cascades to type test_cvn_schema0_new.stream
+drop cascades to continuous view test_cvn_schema0_new.test_cvn0
 drop cascades to continuous view test_cvn_schema0_new.test_cvn1
 SELECT n.nspname, pq.name FROM pipeline_query pq JOIN pg_namespace n ON pq.namespace = n.oid WHERE pq.name LIKE '%test_cvn%' ORDER BY n.nspname, pq.name;
      nspname      |   name    
@@ -42,16 +47,21 @@ SELECT n.nspname, pq.name FROM pipeline_query pq JOIN pg_namespace n ON pq.names
  test_cvn_schema1 | test_cvn0
 (2 rows)
 
-DROP CONTINUOUS VIEW test_cvn0;
+DROP STREAM stream CASCADE;
+NOTICE:  drop cascades to continuous view test_cvn0
 DROP SCHEMA test_cvn_schema1 CASCADE;
-NOTICE:  drop cascades to continuous view test_cvn_schema1.test_cvn0
+NOTICE:  drop cascades to 2 other objects
+DETAIL:  drop cascades to type test_cvn_schema1.stream
+drop cascades to continuous view test_cvn_schema1.test_cvn0
 SELECT n.nspname, pq.name FROM pipeline_query pq JOIN pg_namespace n ON pq.namespace = n.oid WHERE pq.name LIKE '%test_cvn%' ORDER BY n.nspname, pq.name;
  nspname | name 
 ---------+------
 (0 rows)
 
+CREATE STREAM test_cvn_stream ();
 CREATE CONTINUOUS VIEW test_cvn0 AS SELECT x::int FROM test_cvn_stream;
 CREATE SCHEMA test_cvn_schema0;
+CREATE STREAM test_cvn_schema0.test_cvn_stream ();
 CREATE CONTINUOUS VIEW test_cvn_schema0.test_cvn0 AS SELECT x::int, y::text FROM test_cvn_schema0.test_cvn_stream;
 SELECT schema, name, "desc" FROM pipeline_streams() WHERE name='test_cvn_stream' ORDER BY "desc";
       schema      |      name       |                                desc                                
@@ -75,6 +85,9 @@ SELECT * FROM test_cvn_schema0.test_cvn0 ORDER BY x;
  3 | 3
 (2 rows)
 
-DROP CONTINUOUS VIEW test_cvn0;
+DROP STREAM test_cvn_stream CASCADE;
+NOTICE:  drop cascades to continuous view test_cvn0
 DROP SCHEMA test_cvn_schema0 CASCADE;
-NOTICE:  drop cascades to continuous view test_cvn_schema0.test_cvn0
+NOTICE:  drop cascades to 2 other objects
+DETAIL:  drop cascades to type test_cvn_schema0.test_cvn_stream
+drop cascades to continuous view test_cvn_schema0.test_cvn0

@@ -1,3 +1,4 @@
+CREATE STREAM cqlimit_stream ();
 CREATE CONTINUOUS VIEW cqlimit AS SELECT x::int FROM cqlimit_stream LIMIT 9 OFFSET 3;
 
 INSERT INTO cqlimit_stream (x) VALUES (1), (2), (3);
@@ -11,4 +12,4 @@ INSERT INTO cqlimit_stream (x) VALUES (19), (20), (21);
 SELECT * FROM cqlimit ORDER BY x;
 SELECT * FROM cqlimit_mrel0 ORDER BY x;
 
-DROP CONTINUOUS VIEW cqlimit;
+DROP STREAM cqlimit_stream CASCADE;

@@ -1,4 +1,5 @@
 -- Sanity checks
+CREATE STREAM analyze_cont_stream ();
 CREATE CONTINUOUS VIEW cqanalyze0 AS SELECT substring(url::text, 1, 2) FROM analyze_cont_stream;
 CREATE CONTINUOUS VIEW cqanalyze1 AS SELECT CASE WHEN x::text = '1' THEN 1 END FROM analyze_cont_stream;
 CREATE CONTINUOUS VIEW cqanalyze2 AS SELECT a::integer FROM analyze_cont_stream GROUP BY a;
@@ -20,7 +21,9 @@ CREATE CONTINUOUS VIEW cqanalyze13 AS SELECT ts::text, AVG(val::numeric) OVER (O
 
 -- Stream-table JOINs
 CREATE TABLE t0 (id INTEGER);
+CREATE STREAM s0 ();
 CREATE CONTINUOUS VIEW cqanalyze16 AS SELECT s0.id::integer AS s0_id, t0.id AS t0_id FROM s0 JOIN t0 ON s0.id = t0.id;
+CREATE STREAM analyze_cont_stream2 ();
 CREATE CONTINUOUS VIEW cqanalyze17 AS SELECT s.x::integer, t0.id FROM analyze_cont_stream2 s JOIN t0 ON s.x = t0.id;
 
 -- Now let's verify our error handling and messages
@@ -28,6 +31,7 @@ CREATE CONTINUOUS VIEW cqanalyze17 AS SELECT s.x::integer, t0.id FROM analyze_co
 CREATE CONTINUOUS VIEW cqanalyze23 AS SELECT col FROM analyze_cont_stream;
 
 -- Column not qualified with a stream
+CREATE STREAM s1 ();
 CREATE CONTINUOUS VIEW cqanalyze24 AS SELECT id::integer FROM t0, s1;
 
 -- Column has multiple types
@@ -91,12 +95,14 @@ gg::xml
 FROM analyze_cont_stream2 WHERE aa > '2014-01-01 00:00:00' AND n @> '{"key": "value"}'::jsonb AND r > 42.3::money;
 
 -- Verify that type cast for arrival_timestamp is optional
+CREATE STREAM test_stream ();
 CREATE CONTINUOUS VIEW cqanalyze28 AS SELECT arrival_timestamp FROM test_stream;
 CREATE CONTINUOUS VIEW cqanalyze29 AS SELECT key::text, arrival_timestamp FROM test_stream;
 CREATE CONTINUOUS VIEW cqanalyze30 AS SELECT key::text FROM test_stream WHERE arrival_timestamp < TIMESTAMP '2004-10-19 10:23:54+02';
 CREATE CONTINUOUS VIEW cqanalyze31 AS SELECT key::text, arrival_timestamp::timestamptz FROM test_stream;
 
 -- Verify that we can't do wildcard selections in continuous queries
+CREATE STREAM stream ();
 CREATE CONTINUOUS VIEW cqanalyze32 AS SELECT * from stream;
 CREATE CONTINUOUS VIEW cqanalyze33 AS SELECT * from stream, t0;
 CREATE STREAM cqanalyze_wc_stream (x integer);
@@ -116,6 +122,7 @@ CREATE CONTINUOUS VIEW cqanalyze41 AS SELECT COUNT(*) FROM analyze_cont_stream W
 CREATE CONTINUOUS VIEW cqanalyze42 AS SELECT COUNT(*) FROM analyze_cont_stream WHERE arrival_timestamp > clock_timestamp() - interval '1 hour' AND arrival_timestamp > clock_timestamp() - interval '5 hour';
 
 -- Hypothetical-set aggregates
+CREATE STREAM analyze_cont_stream3 ();
 CREATE CONTINUOUS VIEW cqanalyze45 AS SELECT g::integer, percent_rank(1 + 3, 2, substring('xxx', 1, 2)) WITHIN GROUP (ORDER BY x::integer, y::integer, z::text) + rank(4, 5, 'x') WITHIN GROUP (ORDER BY x, y, substring(z, 1, 2))  FROM analyze_cont_stream3 GROUP BY g;
 CREATE CONTINUOUS VIEW cqanalyze46 AS SELECT rank(0, 1) WITHIN GROUP (ORDER BY x::integer, y::integer) + rank(0) WITHIN GROUP (ORDER BY x) FROM analyze_cont_stream3;
 
@@ -125,6 +132,7 @@ CREATE CONTINUOUS VIEW error_not_created AS SELECT percent_rank(1) WITHIN GROUP 
 -- Types of arguments to HS function are inconsistent with GROUP column types
 CREATE CONTINUOUS VIEW error_not_created AS SELECT g::integer, dense_rank(2, 3, 4) WITHIN GROUP (ORDER BY x::integer, y::integer, z::text) FROM analyze_cont_stream GROUP BY g;
 
+CREATE STREAM analyze_cont_stream4 ();
 CREATE CONTINUOUS VIEW cqanalyze47 AS SELECT g::integer, rank(2, 3, 4) WITHIN GROUP (ORDER BY x::integer, y::integer, z::integer), sum(x + y + z) FROM analyze_cont_stream4 GROUP BY g;
 
 -- Sliding windows
@@ -137,10 +145,12 @@ CREATE CONTINUOUS VIEW error_not_created AS SELECT cqanalyze_table.id::integer F
 DROP TABLE cqanalyze_table;
 
 -- Verify that for stream-table joins, the correct error message is generated when the table is missing
+CREATE STREAM not_a_table ();
 CREATE CONTINUOUS VIEW  error_not_created AS SELECT s.id::integer, t.tid FROM analyze_cont_stream s JOIN not_a_table t ON s.id = t.tid;
 CREATE CONTINUOUS VIEW  error_not_created AS SELECT s.id::integer, tid FROM analyze_cont_stream s JOIN not_a_table ON s.id = tid;
 
 -- Ordered-set aggregates
+CREATE STREAM analyze_cont_stream5 ();
 CREATE CONTINUOUS VIEW cqanalyze50 AS SELECT g::integer, percentile_cont(ARRAY[0.2, 0.8]) WITHIN GROUP (ORDER BY x::float), percentile_cont(0.9) WITHIN GROUP (ORDER BY y::integer) + percentile_cont(0.1) WITHIN GROUP (ORDER BY z::numeric) AS col FROM analyze_cont_stream5 GROUP BY g;
 CREATE CONTINUOUS VIEW cqanalyze51 AS SELECT g::integer, percentile_cont(0.1) WITHIN GROUP (ORDER BY x::float + y::integer) FROM analyze_cont_stream3 GROUP BY g;
 
@@ -148,73 +158,31 @@ CREATE CONTINUOUS VIEW cqanalyze51 AS SELECT g::integer, percentile_cont(0.1) WI
 CREATE CONTINUOUS VIEW error_not_created AS SELECT percentile_cont(0.1) WITHIN GROUP (ORDER BY x::text) FROM analyze_cont_stream;
 
 -- Sliding windows
+CREATE STREAM analyze_cont_stream6 ();
 CREATE CONTINUOUS VIEW cqanalyze52 AS SELECT g::integer, percentile_cont(ARRAY[0.2, 0.8]) WITHIN GROUP (ORDER BY x::float), percentile_cont(0.9) WITHIN GROUP (ORDER BY y::integer) + percentile_cont(0.1) WITHIN GROUP (ORDER BY z::numeric) AS col FROM analyze_cont_stream6 WHERE (arrival_timestamp > clock_timestamp() - interval '5 minutes') GROUP BY g;
 CREATE CONTINUOUS VIEW cqanalyze53 AS SELECT percentile_cont(0.1) WITHIN GROUP (ORDER BY x::float + y::integer) FROM analyze_cont_stream3 WHERE (arrival_timestamp > clock_timestamp() - interval '5 minutes');
 
 CREATE CONTINUOUS VIEW funcs AS SELECT floor(x::float8), date_trunc('day', arrival_timestamp), COUNT(*) FROM stream GROUP BY floor, date_trunc;
 
-DROP CONTINUOUS VIEW cqanalyze0;
-DROP CONTINUOUS VIEW cqanalyze1;
-DROP CONTINUOUS VIEW cqanalyze2;
-DROP CONTINUOUS VIEW cqanalyze3;
-DROP CONTINUOUS VIEW cqanalyze4;
-DROP CONTINUOUS VIEW cqanalyze5;
-DROP CONTINUOUS VIEW cqanalyze6;
-DROP CONTINUOUS VIEW cqanalyze7;
-DROP CONTINUOUS VIEW cqanalyze8;
-DROP CONTINUOUS VIEW cqanalyze9;
-DROP CONTINUOUS VIEW cqanalyze10;
-DROP CONTINUOUS VIEW cqanalyze11;
-DROP CONTINUOUS VIEW cqanalyze12;
-DROP CONTINUOUS VIEW cqanalyze13;
-DROP CONTINUOUS VIEW cqanalyze16;
-DROP CONTINUOUS VIEW cqanalyze17;
-DROP CONTINUOUS VIEW cqanalyze23;
-DROP CONTINUOUS VIEW cqanalyze24;
-DROP CONTINUOUS VIEW cqanalyze25;
-DROP CONTINUOUS VIEW cqanalyze26;
-DROP CONTINUOUS VIEW cqanalyze27;
-DROP CONTINUOUS VIEW cqanalyze28;
-DROP CONTINUOUS VIEW cqanalyze29;
-DROP CONTINUOUS VIEW cqanalyze30;
-DROP CONTINUOUS VIEW cqanalyze31;
-DROP CONTINUOUS VIEW cqanalyze32;
-DROP CONTINUOUS VIEW cqanalyze33;
-DROP CONTINUOUS VIEW cqanalyze34;
-DROP CONTINUOUS VIEW cqanalyze35;
-DROP CONTINUOUS VIEW cqanalyze36;
-DROP CONTINUOUS VIEW cqanalyze37;
-DROP CONTINUOUS VIEW cqanalyze38;
-DROP CONTINUOUS VIEW cqanalyze39;
-DROP CONTINUOUS VIEW cqanalyze40;
-DROP CONTINUOUS VIEW cqanalyze41;
-DROP CONTINUOUS VIEW cqanalyze42;
-DROP CONTINUOUS VIEW cqanalyze45;
-DROP CONTINUOUS VIEW cqanalyze46;
-DROP CONTINUOUS VIEW cqanalyze47;
-DROP CONTINUOUS VIEW cqanalyze48;
-DROP CONTINUOUS VIEW cqanalyze49;
-DROP CONTINUOUS VIEW cqanalyze50;
-DROP CONTINUOUS VIEW cqanalyze51;
-DROP CONTINUOUS VIEW cqanalyze52;
-DROP CONTINUOUS VIEW cqanalyze53;
-DROP CONTINUOUS VIEW cvnotice0;
-DROP CONTINUOUS VIEW cvnotice1;
-DROP CONTINUOUS VIEW cvnotice2;
-DROP CONTINUOUS VIEW cvnotice3;
-DROP CONTINUOUS VIEW funcs;
-DROP TABLE t0;
+
+DROP TABLE t0 CASCADE;
+DROP STREAM s0 CASCADE;
+DROP STREAM s1 CASCADE;
+DROP STREAM stream CASCADE;
+DROP STREAM not_a_table CACADE;
+DROP STREAM analyze_cont_stream CASCADE;
+DROP STREAM analyze_cont_stream2 CASCADE;
+DROP STREAM analyze_cont_stream3 CASCADE;
+DROP STREAM analyze_cont_stream4 CASCADE;
+DROP STREAM analyze_cont_stream5 CASCADE;
+DROP STREAM analyze_cont_stream6 CASCADE;
 
 -- Regression
+CREATE STREAM analyze_cont_stream ();
 CREATE CONTINUOUS VIEW cqregress1 AS SELECT id::integer + avg(id) FROM analyze_cont_stream GROUP BY id;
 CREATE CONTINUOUS VIEW cqregress2 AS SELECT date_trunc('hour', ts) AS ts FROM analyze_cont_stream;
 CREATE CONTINUOUS VIEW cqregress3 AS SELECT stream.sid::integer FROM analyze_cont_stream;
 CREATE CONTINUOUS VIEW cqregress4 AS SELECT x::int FROM cqregress4;
 CREATE CONTINUOUS VIEW cqregress5 AS SELECT count(DISTINCT x::int), percentile_cont(0.1) WITHIN GROUP (ORDER BY x) FROM analyze_cont_stream;
 \d+ cqregress5
-
-DROP CONTINUOUS VIEW cqregress1;
-DROP CONTINUOUS VIEW cqregress2;
-DROP CONTINUOUS VIEW cqregress3;
-DROP CONTINUOUS VIEW cqregress4;
-DROP CONTINUOUS VIEW cqregress5;
+DROP STREAM analyze_cont_stream CASCADE;

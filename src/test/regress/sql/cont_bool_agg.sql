@@ -1,4 +1,5 @@
 -- bit_and, bit_or
+CREATE STREAM bit_stream_cqboolagg ();
 CREATE CONTINUOUS VIEW test_bit_and AS SELECT k::text, bit_and(b::bit) FROM bit_stream_cqboolagg GROUP BY k;
 CREATE CONTINUOUS VIEW test_bit_or AS SELECT k::text, bit_or(b::bit) FROM bit_stream_cqboolagg GROUP BY k;
 
@@ -15,6 +16,7 @@ SELECT * FROM test_bit_and ORDER BY k DESC;
 SELECT * FROM test_bit_or ORDER BY k DESC;
 
 -- bool_and, bool_or, every
+CREATE STREAM bool_stream_cqboolagg ();
 CREATE CONTINUOUS VIEW test_bool_and AS SELECT k::text, bool_and(b::boolean) FROM bool_stream_cqboolagg GROUP BY k;
 CREATE CONTINUOUS VIEW test_bool_or AS SELECT k::text, bool_or(b::boolean) FROM bool_stream_cqboolagg GROUP BY k;
 CREATE CONTINUOUS VIEW test_every AS SELECT k::text, every(b::boolean) FROM bool_stream_cqboolagg GROUP BY k;
@@ -33,8 +35,5 @@ SELECT * FROM test_bool_and ORDER BY k DESC;
 SELECT * FROM test_bool_or ORDER BY k DESC;
 SELECT * FROM test_every ORDER BY k DESC;
 
-DROP CONTINUOUS VIEW test_bit_and;
-DROP CONTINUOUS VIEW test_bit_or;
-DROP CONTINUOUS VIEW test_bool_and;
-DROP CONTINUOUS VIEW test_bool_or;
-DROP CONTINUOUS VIEW test_every;
+DROP STREAM bit_stream_cqboolagg CASCADE;
+DROP STREAM bool_stream_cqboolagg CASCADE;

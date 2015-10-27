@@ -1,6 +1,7 @@
 SET IntervalStyle to postgres;
 
 -- Simple ones
+CREATE STREAM create_cont_stream1 ();
 CREATE CONTINUOUS VIEW cqcreate0 AS SELECT key::integer FROM create_cont_stream1;
 SELECT COUNT(*) FROM pipeline_query WHERE name = 'cqcreate0';
 SELECT gc FROM pipeline_query WHERE name = 'cqcreate0';
@@ -21,6 +22,7 @@ SELECT COUNT(*) FROM pipeline_query WHERE name = 'cqcreate2';
 SELECT pipeline_get_overlay_viewdef('cqcreate2');
 
 -- Group by projections
+CREATE STREAM cont_create_stream2 ();
 CREATE CONTINUOUS VIEW cqcreate3 AS SELECT key::text, COUNT(*), SUM(value::int8) FROM cont_create_stream2 GROUP BY key;
 SELECT COUNT(*) FROM pipeline_query WHERE name = 'cqcreate3';
 \d+ cqcreate3;
@@ -114,6 +116,7 @@ GROUP BY a, b, c, d, e;
 SELECT pipeline_get_overlay_viewdef('multigroupindex');
 
 -- A user-specified fillfactor should override the default
+CREATE STREAM stream ();
 CREATE CONTINUOUS VIEW withff WITH (fillfactor = 42) AS SELECT COUNT(*) FROM stream;
 \d+ withff_mrel0;
 
@@ -160,25 +163,6 @@ CREATE VIEW manosw WITH (max_age = '1 day') AS SELECT COUNT(*) FROM withff;
 CREATE VIEW manosw WITH (max_age = '1 day') AS SELECT COUNT(*) FROM stream
 WHERE arrival_timestamp > clock_timestamp() - interval '1 day';
 
-DROP CONTINUOUS VIEW ma0 CASCADE;
-
-DROP CONTINUOUS VIEW cqcreate0;
-DROP CONTINUOUS VIEW cqcreate1;
-DROP CONTINUOUS VIEW cqcreate2;
-DROP CONTINUOUS VIEW cqcreate3;
-DROP CONTINUOUS VIEW cqcreate4;
-DROP CONTINUOUS VIEW cqcreate5;
-DROP CONTINUOUS VIEW cqcreate6;
-DROP CONTINUOUS VIEW cvavg;
-DROP CONTINUOUS VIEW cvjson;
-DROP CONTINUOUS VIEW cvjsonobj;
-DROP CONTINUOUS VIEW cvcount;
-DROP CONTINUOUS VIEW cvarray;
-DROP CONTINUOUS VIEW cvtext;
-DROP CONTINUOUS VIEW cqaggexpr1;
-DROP CONTINUOUS VIEW cqaggexpr2;
-DROP CONTINUOUS VIEW cqaggexpr3;
-DROP CONTINUOUS VIEW cqaggexpr4;
-DROP CONTINUOUS VIEW cqgroupby;
-DROP CONTINUOUS VIEW multigroupindex;
-DROP CONTINUOUS VIEW withff;
+DROP STREAM stream CASCADE;
+DROP STREAM cont_create_stream1 CASCADE;
+DROP STREAM create_cont_stream2 CASCADE;

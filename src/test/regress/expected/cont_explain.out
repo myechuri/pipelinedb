@@ -1,3 +1,4 @@
+CREATE STREAM test_cont_explain_stream ();
 CREATE CONTINUOUS VIEW test_cont_explain1 AS SELECT COUNT(*) FROM test_cont_explain_stream;
 CREATE CONTINUOUS VIEW test_cont_explain2 AS SELECT x::int, COUNT(*) FROM test_cont_explain_stream GROUP BY x;
 CREATE CONTINUOUS VIEW test_cont_explain3 AS SELECT x::int, y::text, SUM(x) FROM test_cont_explain_stream GROUP BY x, y;
@@ -136,3 +137,8 @@ EXPLAIN CONTINUOUS VIEW (COSTS off, VERBOSE on) test_cont_explain3;
                            Index Cond: (hash_group(test_cont_explain3_mrel0.x, test_cont_explain3_mrel0.y) = "*VALUES*".column1)
 (24 rows)
 
+DROP STREAM test_cont_explain_stream CASCADE;
+NOTICE:  drop cascades to 3 other objects
+DETAIL:  drop cascades to continuous view test_cont_explain1
+drop cascades to continuous view test_cont_explain2
+drop cascades to continuous view test_cont_explain3

@@ -1,3 +1,4 @@
+CREATE STREAM cqvacuum_stream ();
 CREATE CONTINUOUS VIEW cqvacuum AS SELECT key::text, COUNT(*) FROM cqvacuum_stream WHERE arrival_timestamp > clock_timestamp() - interval '3 second' GROUP BY key;
 INSERT INTO cqvacuum_stream (key) VALUES ('a'), ('b'), ('c');
 INSERT INTO cqvacuum_stream (key) VALUES ('a'), ('b'), ('c');
@@ -123,4 +124,5 @@ SELECT key, SUM(count) FROM cqvacuum_mrel0 GROUP BY key ORDER BY key;
 -----+-----
 (0 rows)
 
-DROP CONTINUOUS VIEW cqvacuum;
+DROP STREAM cqvacuum_stream CASCADE;
+NOTICE:  drop cascades to continuous view cqvacuum

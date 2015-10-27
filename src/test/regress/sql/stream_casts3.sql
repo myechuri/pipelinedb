@@ -1,3 +1,17 @@
+CREATE STREAM char_stream ();
+CREATE STREAM name_stream ();
+CREATE STREAM text_stream ();
+CREATE STREAM varchar_stream ();
+CREATE STREAM int4_stream ();
+CREATE STREAM date_stream ();
+CREATE STREAM time_stream ();
+CREATE STREAM timestamp_stream ();
+CREATE STREAM timestamptz_stream ();
+CREATE STREAM interval_stream ();
+CREATE STREAM timetz_stream ();
+CREATE STREAM lseg_stream ();
+CREATE STREAM path_stream ();
+
 CREATE CONTINUOUS VIEW test_char_to_bpchar AS SELECT x::char FROM char_stream;
 CREATE CONTINUOUS VIEW test_char_to_varchar AS SELECT x::char FROM char_stream;
 CREATE CONTINUOUS VIEW test_name_to_text AS SELECT x::name FROM name_stream;
@@ -121,38 +135,21 @@ SELECT x FROM test_int4_to_reltime;
 SELECT x FROM test_lseg_to_point;
 SELECT x FROM test_path_to_point;
 
-DROP CONTINUOUS VIEW test_char_to_bpchar;
-DROP CONTINUOUS VIEW test_char_to_varchar;
-DROP CONTINUOUS VIEW test_name_to_text;
-DROP CONTINUOUS VIEW test_name_to_bpchar;
-DROP CONTINUOUS VIEW test_name_to_varchar;
-DROP CONTINUOUS VIEW test_text_to_char;
-DROP CONTINUOUS VIEW test_varchar_to_char;
-DROP CONTINUOUS VIEW test_text_to_name;
-DROP CONTINUOUS VIEW test_varchar_to_name;
-DROP CONTINUOUS VIEW test_char_to_int4;
-DROP CONTINUOUS VIEW test_int4_to_char;
-DROP CONTINUOUS VIEW test_date_to_timestamp;
-DROP CONTINUOUS VIEW test_date_to_timestamptz;
-DROP CONTINUOUS VIEW test_time_to_interval;
-DROP CONTINUOUS VIEW test_time_to_timetz;
-DROP CONTINUOUS VIEW test_timestamp_to_abstime;
-DROP CONTINUOUS VIEW test_timestamp_to_date;
-DROP CONTINUOUS VIEW test_timestamp_to_time;
-DROP CONTINUOUS VIEW test_timestamp_to_timestamptz;
-DROP CONTINUOUS VIEW test_timestamptz_to_abstime;
-DROP CONTINUOUS VIEW test_timestamptz_to_date;
-DROP CONTINUOUS VIEW test_timestamptz_to_time;
-DROP CONTINUOUS VIEW test_timestamptz_to_timestamp;
-DROP CONTINUOUS VIEW test_timestamptz_to_timetz;
-DROP CONTINUOUS VIEW test_interval_to_reltime;
-DROP CONTINUOUS VIEW test_interval_to_time;
-DROP CONTINUOUS VIEW test_timetz_to_time;
-DROP CONTINUOUS VIEW test_int4_to_abstime;
-DROP CONTINUOUS VIEW test_int4_to_reltime;
-DROP CONTINUOUS VIEW test_lseg_to_point;
-DROP CONTINUOUS VIEW test_path_to_point;
+DROP STREAM char_stream CASCADE;
+DROP STREAM name_stream CASCADE;
+DROP STREAM text_stream CASCADE;
+DROP STREAM varchar_stream CASCADE;
+DROP STREAM int4_stream CASCADE;
+DROP STREAM date_stream CASCADE;
+DROP STREAM time_stream CASCADE;
+DROP STREAM timestamp_stream CASCADE;
+DROP STREAM timestamptz_stream CASCADE;
+DROP STREAM interval_stream CASCADE;
+DROP STREAM timetz_stream CASCADE;
+DROP STREAM lseg_stream CASCADE;
+DROP STREAM path_stream CASCADE;
 
+CREATE STREAM cqdecode_stream ();
 CREATE CONTINUOUS VIEW test_bool_inputs AS SELECT b::boolean FROM cqdecode_stream;
 
 INSERT INTO cqdecode_stream (b) VALUES (TRUE), (true), ('true'), ('t'), ('y'), ('on'), ('1'::boolean), (1::boolean);
@@ -160,4 +157,4 @@ INSERT INTO cqdecode_stream (b) VALUES (FALSE), (false), ('false'), ('f'), ('n')
 
 SELECT b, COUNT(*) FROM test_bool_inputs GROUP BY b;
 
-DROP CONTINUOUS VIEW test_bool_inputs;
+DROP STREAM cqdecode_stream CASCADE;

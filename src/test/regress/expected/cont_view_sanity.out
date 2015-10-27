@@ -1,3 +1,4 @@
+CREATE STREAM sanity_stream ();
 CREATE CONTINUOUS VIEW test_avg AS SELECT key::text, avg(value::float8) FROM sanity_stream GROUP BY key;
 INSERT INTO sanity_stream (key, value) VALUES ('x', 1), ('x', 2), ('y', 100);
 SELECT * FROM test_avg ORDER BY key;
@@ -111,11 +112,13 @@ SELECT * FROM test_null_group;
    | 1
 (3 rows)
 
-DROP CONTINUOUS VIEW test_avg;
-DROP CONTINUOUS VIEW cv;
-DROP CONTINUOUS VIEW cv_weird_tl;
-DROP CONTINUOUS VIEW cv_no_grp;
-DROP CONTINUOUS VIEW cv_grp_expr;
-DROP CONTINUOUS VIEW cv_multi_grp;
-DROP CONTINUOUS VIEW cv_agg_expr;
-DROP CONTINUOUS VIEW test_null_group;
+DROP STREAM sanity_stream CASCADE;
+NOTICE:  drop cascades to 8 other objects
+DETAIL:  drop cascades to continuous view test_avg
+drop cascades to continuous view cv
+drop cascades to continuous view cv_weird_tl
+drop cascades to continuous view cv_no_grp
+drop cascades to continuous view cv_grp_expr
+drop cascades to continuous view cv_multi_grp
+drop cascades to continuous view cv_agg_expr
+drop cascades to continuous view test_null_group

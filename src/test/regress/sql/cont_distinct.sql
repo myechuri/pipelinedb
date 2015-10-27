@@ -1,4 +1,5 @@
 -- COUNT(DISTINCT ...)
+CREATE STREAM test_distinct_count_stream ();
 CREATE CONTINUOUS VIEW test_distinct_count AS SELECT COUNT(DISTINCT x::integer) FROM test_distinct_count_stream;
 CREATE CONTINUOUS VIEW test_distinct_sw_count AS SELECT COUNT(DISTINCT x::integer) FROM test_distinct_count_stream WHERE (arrival_timestamp > clock_timestamp() - interval '10 seconds');
 CREATE CONTINUOUS VIEW test_distinct_sw_count_small AS SELECT COUNT(DISTINCT x::integer) FROM test_distinct_count_stream WHERE (arrival_timestamp > clock_timestamp() - interval '1 second');;
@@ -50,11 +51,10 @@ SELECT * FROM test_distinct_sw_count;
 SELECT pg_sleep(1);
 SELECT * FROM test_distinct_sw_count_small;
 
-DROP CONTINUOUS VIEW test_distinct_count;
-DROP CONTINUOUS VIEW test_distinct_sw_count;
-DROP CONTINUOUS VIEW test_distinct_sw_count_small;
+DROP STREAM test_distinct_count_stream CASCADE;
 
 -- DISTINCT / DISTINCT ON
+CREATE STREAM test_distinct_stream ();
 CREATE CONTINUOUS VIEW test_distinct AS SELECT DISTINCT x::int, y::int - z::int FROM test_distinct_stream;
 CREATE CONTINUOUS VIEW test_distinct_on AS SELECT DISTINCT ON (x::int, y::int - z::int) x::int, y::int, z::int FROM test_distinct_stream;
 
@@ -99,9 +99,6 @@ INSERT INTO test_distinct_stream (z, y, x) VALUES (null, null, null);
 SELECT * FROM test_distinct ORDER BY x;
 SELECT * FROM test_distinct_on ORDER BY x;
 
-DROP CONTINUOUS VIEW test_distinct;
-DROP CONTINUOUS VIEW test_distinct_on;
-
 CREATE CONTINUOUS VIEW test_distinct_regress AS SELECT DISTINCT x::int, y::int FROM test_distinct_stream;
 
 INSERT INTO test_distinct_stream (x) VALUES (1);
@@ -109,4 +106,4 @@ INSERT INTO test_distinct_stream (y) VALUES (1);
 
 SELECT * FROM test_distinct_regress;
 
-DROP CONTINUOUS VIEW test_distinct_regress;
+DROP STREAM test_distinct_stream CASCADE;

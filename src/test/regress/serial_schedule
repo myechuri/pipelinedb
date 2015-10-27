@@ -184,7 +184,6 @@ test: hash_group
 test: date_round
 test: stream_insert_subselect
 test: stream_exprs
-test: stream_targets
 test: schema_inference
 test: prepared_stream_insert
 test: cont_view_tablespace

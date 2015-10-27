@@ -153,6 +153,7 @@ FROM generate_series(1, 100) AS i ORDER BY key;
 (100 rows)
 
 -- Ensure that hash index is created and cannot be dropped
+CREATE STREAM hash_group_stream ();
 CREATE CONTINUOUS VIEW hash_group AS SELECT x::int, COUNT(*) FROM hash_group_stream GROUP BY x;
 CREATE CONTINUOUS VIEW ls_hash_group1 AS SELECT x::int, minute(y::timestamptz), COUNT(*) FROM hash_group_stream WHERE ( arrival_timestamp > clock_timestamp() - interval '5 hour' ) GROUP BY x, minute;
 CREATE CONTINUOUS VIEW ls_hash_group2 AS SELECT x::int, y::timestamptz, COUNT(*) FROM hash_group_stream GROUP BY x, y;
@@ -198,6 +199,8 @@ HINT:  You can drop table ls_hash_group1_mrel0 instead.
 DROP INDEX ls_hash_group2_mrel0_expr_idx;
 ERROR:  cannot drop index ls_hash_group2_mrel0_expr_idx because table ls_hash_group2_mrel0 requires it
 HINT:  You can drop table ls_hash_group2_mrel0 instead.
-DROP CONTINUOUS VIEW hash_group;
-DROP CONTINUOUS VIEW ls_hash_group1;
-DROP CONTINUOUS VIEW ls_hash_group2;
+DROP STREAM hash_group_stream CASCADE;
+NOTICE:  drop cascades to 3 other objects
+DETAIL:  drop cascades to continuous view hash_group
+drop cascades to continuous view ls_hash_group1
+drop cascades to continuous view ls_hash_group2

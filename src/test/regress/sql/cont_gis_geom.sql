@@ -1,3 +1,6 @@
+CREATE STREAM test_gis_geom_stream ();
+CREATE STREAM test_gis_topo_stream ();
+
 -- ST_Extent(geometry)
 CREATE CONTINUOUS VIEW test_st_extent AS SELECT id::integer, ST_Extent(g::geometry) FROM test_gis_geom_stream GROUP BY id;
 CREATE CONTINUOUS VIEW test_sw_st_extent AS SELECT id::integer, ST_Extent(g::geometry) FROM test_gis_geom_stream WHERE (arrival_timestamp > clock_timestamp() - interval '1 hour') GROUP BY id;
@@ -213,24 +216,5 @@ SELECT * FROM test_sw_st_extent ORDER BY id;
 SELECT * FROM test_sw_st_3dextent ORDER BY id;
 SELECT id, array_length(topoelementarray_agg, 1) FROM test_sw_topo_agg ORDER BY id;
 
-DROP CONTINUOUS VIEW test_st_extent;
-DROP CONTINUOUS VIEW test_st_3dextent;
-DROP CONTINUOUS VIEW test_st_memcollect;
-DROP CONTINUOUS VIEW test_st_union;
-DROP CONTINUOUS VIEW test_st_memunion;
-DROP CONTINUOUS VIEW test_st_accum;
-DROP CONTINUOUS VIEW test_st_collect;
-DROP CONTINUOUS VIEW test_st_polygonize;
-DROP CONTINUOUS VIEW test_st_makeline;
-DROP CONTINUOUS VIEW test_topo_agg;
-
-DROP CONTINUOUS VIEW test_sw_st_extent;
-DROP CONTINUOUS VIEW test_sw_st_3dextent;
-DROP CONTINUOUS VIEW test_sw_st_memcollect;
-DROP CONTINUOUS VIEW test_sw_st_union;
-DROP CONTINUOUS VIEW test_sw_st_memunion;
-DROP CONTINUOUS VIEW test_sw_st_accum;
-DROP CONTINUOUS VIEW test_sw_st_collect;
-DROP CONTINUOUS VIEW test_sw_st_polygonize;
-DROP CONTINUOUS VIEW test_sw_st_makeline;
-DROP CONTINUOUS VIEW test_sw_topo_agg;
+DROP STREAM test_gis_geom_stream CASCADE;
+DROP STREAM test_gis_topo_stream CASCADE;

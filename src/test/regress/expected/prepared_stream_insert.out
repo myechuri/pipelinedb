@@ -1,3 +1,4 @@
+CREATE STREAM prep_insert_stream ();
 CREATE CONTINUOUS VIEW prep_insert0 AS SELECT COUNT(*) FROM prep_insert_stream;
 CREATE CONTINUOUS VIEW prep_insert1 AS SELECT sum(x::float8) AS fsum, sum(y::int8) AS isum FROM prep_insert_stream;
 CREATE CONTINUOUS VIEW prep_insert2 AS SELECT sum(x::integer) AS isum, sum(y::int4) AS i4sum FROM prep_insert_stream;
@@ -67,8 +68,10 @@ SELECT * FROM prep_insert3;
   3 |  9
 (1 row)
 
-DROP CONTINUOUS VIEW prep_insert0;
-DROP CONTINUOUS VIEW prep_insert1;
-DROP CONTINUOUS VIEW prep_insert2;
-DROP CONTINUOUS VIEW prep_insert3;
+DROP STREAM prep_insert_stream CASCADE;
+NOTICE:  drop cascades to 4 other objects
+DETAIL:  drop cascades to continuous view prep_insert0
+drop cascades to continuous view prep_insert1
+drop cascades to continuous view prep_insert2
+drop cascades to continuous view prep_insert3
 DROP TABLE prep_insert_t;

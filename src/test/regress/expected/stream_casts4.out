@@ -1,3 +1,16 @@
+CREATE STREAM path_stream ();
+CREATE STREAM box_stream ();
+CREATE STREAM polygon_stream ();
+CREATE STREAM circle_stream ();
+CREATE STREAM cidr_stream ();
+CREATE STREAM inet_stream ();
+CREATE STREAM bit_stream ();
+CREATE STREAM varbit_stream ();
+CREATE STREAM int8_stream ();
+CREATE STREAM int4_stream ();
+CREATE STREAM bool_stream ();
+CREATE STREAM json_stream ();
+CREATE STREAM jsonb_stream ();
 CREATE CONTINUOUS VIEW test_path_to_polygon AS SELECT x::path FROM path_stream;
 CREATE CONTINUOUS VIEW test_box_to_point AS SELECT x::box FROM box_stream;
 CREATE CONTINUOUS VIEW test_box_to_lseg AS SELECT x::box FROM box_stream;
@@ -386,34 +399,54 @@ SELECT x FROM test_jsonb_to_json;
  [0, 1, 2]
 (1 row)
 
-DROP CONTINUOUS VIEW test_path_to_polygon;
-DROP CONTINUOUS VIEW test_box_to_point;
-DROP CONTINUOUS VIEW test_box_to_lseg;
-DROP CONTINUOUS VIEW test_box_to_polygon;
-DROP CONTINUOUS VIEW test_box_to_circle;
-DROP CONTINUOUS VIEW test_polygon_to_point;
-DROP CONTINUOUS VIEW test_polygon_to_path;
-DROP CONTINUOUS VIEW test_polygon_to_box;
-DROP CONTINUOUS VIEW test_polygon_to_circle;
-DROP CONTINUOUS VIEW test_circle_to_point;
-DROP CONTINUOUS VIEW test_circle_to_box;
-DROP CONTINUOUS VIEW test_circle_to_polygon;
-DROP CONTINUOUS VIEW test_cidr_to_inet;
-DROP CONTINUOUS VIEW test_inet_to_cidr;
-DROP CONTINUOUS VIEW test_bit_to_varbit;
-DROP CONTINUOUS VIEW test_varbit_to_bit;
-DROP CONTINUOUS VIEW test_int8_to_bit;
-DROP CONTINUOUS VIEW test_int4_to_bit;
-DROP CONTINUOUS VIEW test_bit_to_int8;
-DROP CONTINUOUS VIEW test_bit_to_int4;
-DROP CONTINUOUS VIEW test_cidr_to_text;
-DROP CONTINUOUS VIEW test_inet_to_text;
-DROP CONTINUOUS VIEW test_bool_to_text;
-DROP CONTINUOUS VIEW test_cidr_to_varchar;
-DROP CONTINUOUS VIEW test_inet_to_varchar;
-DROP CONTINUOUS VIEW test_bool_to_varchar;
-DROP CONTINUOUS VIEW test_cidr_to_bpchar;
-DROP CONTINUOUS VIEW test_inet_to_bpchar;
-DROP CONTINUOUS VIEW test_bool_to_bpchar;
-DROP CONTINUOUS VIEW test_json_to_jsonb;
-DROP CONTINUOUS VIEW test_jsonb_to_json;
+DROP STREAM path_stream CASCADE;
+NOTICE:  drop cascades to continuous view test_path_to_polygon
+DROP STREAM box_stream CASCADE;
+NOTICE:  drop cascades to 4 other objects
+DETAIL:  drop cascades to continuous view test_box_to_point
+drop cascades to continuous view test_box_to_lseg
+drop cascades to continuous view test_box_to_polygon
+drop cascades to continuous view test_box_to_circle
+DROP STREAM polygon_stream CASCADE;
+NOTICE:  drop cascades to 4 other objects
+DETAIL:  drop cascades to continuous view test_polygon_to_point
+drop cascades to continuous view test_polygon_to_path
+drop cascades to continuous view test_polygon_to_box
+drop cascades to continuous view test_polygon_to_circle
+DROP STREAM circle_stream CASCADE;
+NOTICE:  drop cascades to 3 other objects
+DETAIL:  drop cascades to continuous view test_circle_to_point
+drop cascades to continuous view test_circle_to_box
+drop cascades to continuous view test_circle_to_polygon
+DROP STREAM cidr_stream CASCADE;
+NOTICE:  drop cascades to 4 other objects
+DETAIL:  drop cascades to continuous view test_cidr_to_inet
+drop cascades to continuous view test_cidr_to_text
+drop cascades to continuous view test_cidr_to_varchar
+drop cascades to continuous view test_cidr_to_bpchar
+DROP STREAM inet_stream CASCADE;
+NOTICE:  drop cascades to 4 other objects
+DETAIL:  drop cascades to continuous view test_inet_to_cidr
+drop cascades to continuous view test_inet_to_text
+drop cascades to continuous view test_inet_to_varchar
+drop cascades to continuous view test_inet_to_bpchar
+DROP STREAM bit_stream CASCADE;
+NOTICE:  drop cascades to 3 other objects
+DETAIL:  drop cascades to continuous view test_bit_to_varbit
+drop cascades to continuous view test_bit_to_int8
+drop cascades to continuous view test_bit_to_int4
+DROP STREAM varbit_stream CASCADE;
+NOTICE:  drop cascades to continuous view test_varbit_to_bit
+DROP STREAM int8_stream CASCADE;
+NOTICE:  drop cascades to continuous view test_int8_to_bit
+DROP STREAM int4_stream CASCADE;
+NOTICE:  drop cascades to continuous view test_int4_to_bit
+DROP STREAM bool_stream CASCADE;
+NOTICE:  drop cascades to 3 other objects
+DETAIL:  drop cascades to continuous view test_bool_to_text
+drop cascades to continuous view test_bool_to_varchar
+drop cascades to continuous view test_bool_to_bpchar
+DROP STREAM json_stream CASCADE;
+NOTICE:  drop cascades to continuous view test_json_to_jsonb
+DROP STREAM jsonb_stream CASCADE;
+NOTICE:  drop cascades to continuous view test_jsonb_to_json

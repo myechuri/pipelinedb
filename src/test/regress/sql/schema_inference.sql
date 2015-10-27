@@ -1,3 +1,4 @@
+CREATE STREAM infer_stream ();
 CREATE CONTINUOUS VIEW infer_v0 AS SELECT x::int8, y::bigint FROM infer_stream;
 CREATE CONTINUOUS VIEW infer_v1 AS SELECT x::int4, y::real FROM infer_stream;
 CREATE CONTINUOUS VIEW infer_v2 AS SELECT x::int2, y::integer FROM infer_stream;
@@ -25,10 +26,4 @@ SELECT * FROM infer_v4 ORDER BY x, y;
 SELECT * FROM infer_v5 ORDER BY x, y, s::text;
 SELECT * FROM infer_v6 ORDER BY x, y, s::text;
 
-DROP CONTINUOUS VIEW infer_v0;
-DROP CONTINUOUS VIEW infer_v1;
-DROP CONTINUOUS VIEW infer_v2;
-DROP CONTINUOUS VIEW infer_v3;
-DROP CONTINUOUS VIEW infer_v4;
-DROP CONTINUOUS VIEW infer_v5;
-DROP CONTINUOUS VIEW infer_v6;
+DROP STREAM infer_stream CASCADE;

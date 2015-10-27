@@ -1054,15 +1054,6 @@ ValidateContQuery(RangeVar *name, Node *node, const char *sql)
 				parser_errposition(context->pstate, rv->location)));
 	}
 
-	stream = (RangeVar *) linitial(context->streams);
-
-	if (equal(stream, name))
-		ereport(ERROR,
-				(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
-				errmsg("continuous queries cannot read from themselves"),
-				errhint("Remove \"%s\" from the FROM clause.", stream->relname),
-				parser_errposition(context->pstate, stream->location)));
-
 	/*
 	 * Ensure that we have no `*` in the target list.
 	 *
@@ -1089,6 +1080,7 @@ ValidateContQuery(RangeVar *name, Node *node, const char *sql)
 		}
 	}
 
+	stream = (RangeVar *) linitial(context->streams);
 	RangeVarIsForStream(stream, &is_inferred);
 
 	/* Ensure that each column being read from an inferred stream is type-casted */
@@ -1600,6 +1592,9 @@ transformCreateStreamStmt(CreateStreamStmt *stmt)
 	ListCell *lc;
 	bool saw_atime = false;
 
+	/* Stream is inferred if no columns were specified. */
+	stmt->is_inferred = list_length(stmt->base.tableElts) == 0;
+
 	foreach(lc, stmt->base.tableElts)
 	{
 		ColumnDef *coldef = (ColumnDef *) lfirst(lc);
@@ -1631,35 +1626,6 @@ transformCreateStreamStmt(CreateStreamStmt *stmt)
 
 		stmt->base.tableElts = lappend(stmt->base.tableElts, coldef);
 	}
-}
-
-static bool
-create_inferred_streams(Node *node, void *context)
-{
-	if (node == NULL)
-		return false;
-
-	if (IsA(node, RangeVar))
-	{
-		RangeVar *rv = (RangeVar *) node;
-		Oid relid = RangeVarGetRelid(rv, NoLock, true);
-
-		if (!OidIsValid(relid))
-			CreateInferredStream(rv);
-
-		return false;
-	}
-
-	return raw_expression_tree_walker(node, create_inferred_streams, context);
-}
-
-/*
- * CreateInferredStreams
- */
-void
-CreateInferredStreams(SelectStmt *stmt)
-{
-	create_inferred_streams(copyObject(stmt->fromClause), NULL);
 }
 
 /*

@@ -1,3 +1,5 @@
+CREATE STREAM test_gis_raster_stream ();
+
 -- ST_SummaryStatsAgg(raster, integer, boolean)
 -- ST_SummaryStatsAgg(raster, boolean, double)
 -- ST_SummaryStatsAgg(raster, integer, boolean, double)
@@ -198,25 +200,4 @@ SELECT * FROM  test_sw_st_union_raster1;
 SELECT * FROM  test_sw_st_union_raster2;
 SELECT * FROM  test_sw_st_union_raster3;
 
-DROP CONTINUOUS VIEW test_st_stats_agg0;
-DROP CONTINUOUS VIEW test_st_stats_agg1;
-DROP CONTINUOUS VIEW test_st_stats_agg2;
-DROP CONTINUOUS VIEW test_sw_st_stats_agg0;
-DROP CONTINUOUS VIEW test_sw_st_stats_agg1;
-DROP CONTINUOUS VIEW test_sw_st_stats_agg2;
-DROP CONTINUOUS VIEW test_st_countagg0;
-DROP CONTINUOUS VIEW test_st_countagg1;
-DROP CONTINUOUS VIEW test_st_countagg2;
-DROP CONTINUOUS VIEW test_sw_st_countagg0;
-DROP CONTINUOUS VIEW test_sw_st_countagg1;
-DROP CONTINUOUS VIEW test_sw_st_countagg2;
-DROP CONTINUOUS VIEW test_st_samealignment;
-DROP CONTINUOUS VIEW test_sw_st_samealignment;
-DROP CONTINUOUS VIEW test_st_union_raster0;
-DROP CONTINUOUS VIEW test_st_union_raster1;
-DROP CONTINUOUS VIEW test_st_union_raster2;
-DROP CONTINUOUS VIEW test_st_union_raster3;
-DROP CONTINUOUS VIEW test_sw_st_union_raster0;
-DROP CONTINUOUS VIEW test_sw_st_union_raster1;
-DROP CONTINUOUS VIEW test_sw_st_union_raster2;
-DROP CONTINUOUS VIEW test_sw_st_union_raster3;
+DROP STREAM test_gis_raster_stream CASCADE;
