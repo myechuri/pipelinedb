@@ -55,7 +55,6 @@ extern bool collect_rels_and_streams(Node *node, ContAnalyzeContext *context);
 extern bool collect_types_and_cols(Node *node, ContAnalyzeContext *context);
 
 extern ContAnalyzeContext *MakeContAnalyzeContext(ParseState *pstate, SelectStmt *select, ContQueryProcType type);
-extern void CreateInferredStreams(SelectStmt *stmt);
 extern void MakeSelectsContinuous(SelectStmt *stmt);
 extern void ValidateContQuery(RangeVar *name, Node *node, const char *sql);
 
