@@ -1,5 +1,7 @@
 SET IntervalStyle to postgres;
 
+CREATE STREAM msw_stream ();
+
 -- We can't reference arrival_timestamp if the underlying CV isn't a SW
 CREATE CONTINUOUS VIEW msw0 AS SELECT x::integer, COUNT(*) FROM msw_stream
 WHERE x > 10 GROUP BY x;
@@ -74,7 +76,7 @@ DROP CONTINUOUS VIEW msw3 CASCADE;
 CREATE CONTINUOUS VIEW msw5 AS
 SELECT
   minute(arrival_timestamp) AS sw_time
-FROM stream
+FROM msw_stream
 WHERE minute(arrival_timestamp) > clock_timestamp() - INTERVAL '10 minute';
 \d+ msw5
 
@@ -87,3 +89,5 @@ CREATE VIEW msw7 AS SELECT * FROM msw5 WHERE sw_time > clock_timestamp() - INTER
 SELECT * FROM msw7;
 
 DROP CONTINUOUS VIEW msw5 CASCADE;
+
+DROP STREAM msw_stream CASCADE;
