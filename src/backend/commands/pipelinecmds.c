@@ -47,7 +47,6 @@
 #include "pipeline/cont_plan.h"
 #include "pipeline/miscutils.h"
 #include "pipeline/stream.h"
-#include "pipeline/tuplebuf.h"
 #include "regex/regex.h"
 #include "tcop/dest.h"
 #include "tcop/pquery.h"
@@ -400,7 +399,7 @@ ExecCreateContViewStmt(CreateContViewStmt *stmt, const char *querystring)
 				(errcode(ERRCODE_DUPLICATE_CONTINUOUS_VIEW),
 				errmsg("continuous view \"%s\" already exists", view->relname)));
 
-	matrel = makeRangeVar(view->schemaname, GetUniqueMatRelName(view->relname, view->schemaname), -1);
+	matrel = makeRangeVar(view->schemaname, CVNameToMatRelName(view->relname), -1);
 
 	/*
 	 * allowSystemTableMods is a global flag that, when true, allows certain column types
@@ -497,7 +496,7 @@ ExecCreateContViewStmt(CreateContViewStmt *stmt, const char *querystring)
 	 * pqoid is the oid of the row in pipeline_query,
 	 * cvid is the id of the continuous view (used in reader bitmaps)
 	 */
-	pqoid = DefineContinuousView(view, cont_query, matrel, context->is_sw,  
+	pqoid = DefineContinuousView(view, cont_query, matreloid, context->is_sw,
 								 IsContQueryAdhocProcess(),
 								 &cvid);
 	CommandCounterIncrement();

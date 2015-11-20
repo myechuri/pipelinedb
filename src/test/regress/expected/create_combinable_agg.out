@@ -67,14 +67,14 @@ SELECT count(*) FROM pipeline_combine WHERE combinefn IN
 -- Verify that the matrel looks ok
 CREATE CONTINUOUS VIEW test_combinable_aggs_v0 AS
 	SELECT x::integer, combinable_avg(y::integer) FROM cca_stream GROUP BY x;
-\d+ test_combinable_aggs_v0_mrel0;
-                 Table "public.test_combinable_aggs_v0_mrel0"
+\d+ test_combinable_aggs_v0_mrel;
+                 Table "public.test_combinable_aggs_v0_mrel"
      Column     |  Type   | Modifiers | Storage  | Stats target | Description 
 ----------------+---------+-----------+----------+--------------+-------------
  x              | integer |           | plain    |              | 
  combinable_avg | json    |           | extended |              | 
 Indexes:
-    "test_combinable_aggs_v0_mrel0_expr_idx" btree (hash_group(x))
+    "test_combinable_aggs_v0_mrel_expr_idx" btree (hash_group(x))
 Options: fillfactor=50
 
 INSERT INTO cca_stream (x, y) VALUES (0, 0);
@@ -101,7 +101,7 @@ SELECT round(combinable_avg) FROM test_combinable_aggs_v0 ORDER BY x;
      6
 (4 rows)
 
-SELECT x, combinable_avg FROM test_combinable_aggs_v0_mrel0 ORDER BY x;
+SELECT x, combinable_avg FROM test_combinable_aggs_v0_mrel ORDER BY x;
  x |      combinable_avg       
 ---+---------------------------
  0 | { "sum": 1, "count": 2 }
@@ -197,7 +197,7 @@ BEGIN
 END;
 $$
 LANGUAGE 'plpgsql' IMMUTABLE;
-CREATE AGGREGATE set_agg (anyelement) (
+CREATE AGGREGATE test_set_agg (anyelement) (
   stype = anyarray,
   sfunc = set_add,
   combinefunc = set_merge
@@ -206,19 +206,19 @@ CREATE TABLE cont_plpgsql_t (x text);
 INSERT INTO cont_plpgsql_t VALUES ('a'), ('b'), ('c');
 INSERT INTO cont_plpgsql_t VALUES ('a'), ('b'), ('c');
 INSERT INTO cont_plpgsql_t VALUES ('d'), ('e'), ('f');
-SELECT set_agg(x) FROM cont_plpgsql_t;
-    set_agg    
+SELECT test_set_agg(x) FROM cont_plpgsql_t;
+ test_set_agg  
 ---------------
  {a,b,c,d,e,f}
 (1 row)
 
-SELECT set_merge(set_agg(x), set_add(NULL::text[], 'z')) FROM cont_plpgsql_t;
+SELECT set_merge(test_set_agg(x), set_add(NULL::text[], 'z')) FROM cont_plpgsql_t;
     set_merge    
 -----------------
  {a,b,c,d,e,f,z}
 (1 row)
 
-CREATE CONTINUOUS VIEW cont_plpgsql_cv AS SELECT set_agg(x::text) FROM cont_plpgsql_s;
+CREATE CONTINUOUS VIEW cont_plpgsql_cv AS SELECT test_set_agg(x::text) FROM cont_plpgsql_s;
 INSERT INTO cont_plpgsql_s (x) VALUES ('a'), ('b'), ('c');
 SELECT pg_sleep(0.2);
  pg_sleep 
@@ -234,7 +234,7 @@ SELECT pg_sleep(0.2);
 (1 row)
 
 INSERT INTO cont_plpgsql_s (x) VALUES ('d'), ('e'), ('f');
-SELECT unnest(set_agg) FROM cont_plpgsql_cv ORDER BY unnest;
+SELECT unnest(test_set_agg) FROM cont_plpgsql_cv ORDER BY unnest;
  unnest 
 --------
  a
@@ -247,6 +247,6 @@ SELECT unnest(set_agg) FROM cont_plpgsql_cv ORDER BY unnest;
 
 DROP TABLE cont_plpgsql_t;
 DROP CONTINUOUS VIEW cont_plpgsql_cv;
-DROP AGGREGATE set_agg (anyelement);
+DROP AGGREGATE test_set_agg (anyelement);
 DROP FUNCTION set_add (anyarray, anyelement);
 DROP FUNCTION set_merge (anyarray, anyarray);

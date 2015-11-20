@@ -2979,6 +2979,20 @@ GetCommandLogLevel(Node *parsetree)
 			}
 			break;
 
+		/* PipelineDB */
+		case T_CreateContViewStmt:
+		case T_CreateStreamStmt:
+			lev = LOGSTMT_DDL;
+			break;
+
+		case T_TruncateContViewStmt:
+			lev = LOGSTMT_MOD;
+			break;
+
+		case T_ExplainContViewStmt:
+			lev = LOGSTMT_ALL;
+			break;
+
 		default:
 			elog(WARNING, "unrecognized node type: %d",
 				 (int) nodeTag(parsetree));

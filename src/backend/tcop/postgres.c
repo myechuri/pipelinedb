@@ -68,7 +68,6 @@
 #include "parser/parse_type.h"
 #include "pipeline/cont_analyze.h"
 #include "pipeline/stream.h"
-#include "pipeline/tuplebuf.h"
 #include "pg_getopt.h"
 #include "postmaster/autovacuum.h"
 #include "postmaster/postmaster.h"
@@ -959,7 +958,7 @@ exec_simple_query(const char *query_string)
 
 		if (IsAdhocQuery(parsetree))
 		{
-			ExecAdhocQuery(parsetree, query_string);
+			ExecAdhocQuery(parsetree);
 			continue;
 		}
 

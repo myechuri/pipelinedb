@@ -25,42 +25,7 @@
 #include "utils/palloc.h"
 #include "utils/syscache.h"
 
-#define CQ_TABLE_SUFFIX "_mrel"
-
 bool continuous_query_materialization_table_updatable;
-
-/*
- * GetUniqueMatRelName
- *
- * Returns a unique name for the given CV's underlying materialization table
- */
-char *
-GetUniqueMatRelName(char *cvname, char* nspname)
-{
-	char *relname = palloc0(NAMEDATALEN);
-	int i = 0;
-	StringInfoData suffix;
-	Oid nspoid;
-
-	if (nspname != NULL)
-		nspoid = GetSysCacheOid1(NAMESPACENAME, CStringGetDatum(nspname));
-	else
-		nspoid = InvalidOid;
-
-	initStringInfo(&suffix);
-	strcpy(relname, cvname);
-
-	while (true)
-	{
-		appendStringInfo(&suffix, "%s%d", CQ_TABLE_SUFFIX, i);
-		append_suffix(relname, suffix.data, NAMEDATALEN);
-		resetStringInfo(&suffix);
-		if (!OidIsValid(get_relname_relid(relname, nspoid)))
-			break;
-	}
-
-	return relname;
-}
 
 /*
  * CQMatViewOpen
@@ -219,4 +184,15 @@ ExecCQMatRelInsert(ResultRelInfo *ri, TupleTableSlot *slot, EState *estate)
 
 	heap_insert(ri->ri_RelationDesc, tup, GetCurrentCommandId(true), 0, NULL);
 	ExecInsertCQMatRelIndexTuples(ri, slot, estate);
+}
+
+char *
+CVNameToMatRelName(char *cv_name)
+{
+	char *relname = palloc0(NAMEDATALEN);
+
+	strcpy(relname, cv_name);
+	append_suffix(relname, CQ_MATREL_SUFFIX, NAMEDATALEN);
+
+	return relname;
 }

@@ -71,7 +71,7 @@ SELECT count(*) FROM pipeline_combine WHERE combinefn IN
 CREATE CONTINUOUS VIEW test_combinable_aggs_v0 AS
 	SELECT x::integer, combinable_avg(y::integer) FROM cca_stream GROUP BY x;
 
-\d+ test_combinable_aggs_v0_mrel0;
+\d+ test_combinable_aggs_v0_mrel;
 
 INSERT INTO cca_stream (x, y) VALUES (0, 0);
 INSERT INTO cca_stream (x, y) VALUES (0, 1);
@@ -87,7 +87,7 @@ INSERT INTO cca_stream (x, y) VALUES (3, 6);
 INSERT INTO cca_stream (x, y) VALUES (3, 7);
 
 SELECT round(combinable_avg) FROM test_combinable_aggs_v0 ORDER BY x;
-SELECT x, combinable_avg FROM test_combinable_aggs_v0_mrel0 ORDER BY x;
+SELECT x, combinable_avg FROM test_combinable_aggs_v0_mrel ORDER BY x;
 
 -- We should also be able to run user combines on it
 SELECT combine(combinable_avg) FROM test_combinable_aggs_v0;
@@ -162,7 +162,7 @@ END;
 $$
 LANGUAGE 'plpgsql' IMMUTABLE;
 
-CREATE AGGREGATE set_agg (anyelement) (
+CREATE AGGREGATE test_set_agg (anyelement) (
   stype = anyarray,
   sfunc = set_add,
   combinefunc = set_merge
@@ -174,11 +174,11 @@ INSERT INTO cont_plpgsql_t VALUES ('a'), ('b'), ('c');
 INSERT INTO cont_plpgsql_t VALUES ('a'), ('b'), ('c');
 INSERT INTO cont_plpgsql_t VALUES ('d'), ('e'), ('f');
 
-SELECT set_agg(x) FROM cont_plpgsql_t;
+SELECT test_set_agg(x) FROM cont_plpgsql_t;
 
-SELECT set_merge(set_agg(x), set_add(NULL::text[], 'z')) FROM cont_plpgsql_t;
+SELECT set_merge(test_set_agg(x), set_add(NULL::text[], 'z')) FROM cont_plpgsql_t;
 
-CREATE CONTINUOUS VIEW cont_plpgsql_cv AS SELECT set_agg(x::text) FROM cont_plpgsql_s;
+CREATE CONTINUOUS VIEW cont_plpgsql_cv AS SELECT test_set_agg(x::text) FROM cont_plpgsql_s;
 
 INSERT INTO cont_plpgsql_s (x) VALUES ('a'), ('b'), ('c');
 SELECT pg_sleep(0.2);
@@ -186,11 +186,11 @@ INSERT INTO cont_plpgsql_s (x) VALUES ('a'), ('b'), ('c');
 SELECT pg_sleep(0.2);
 INSERT INTO cont_plpgsql_s (x) VALUES ('d'), ('e'), ('f');
 
-SELECT unnest(set_agg) FROM cont_plpgsql_cv ORDER BY unnest;
+SELECT unnest(test_set_agg) FROM cont_plpgsql_cv ORDER BY unnest;
 
 DROP TABLE cont_plpgsql_t;
 DROP CONTINUOUS VIEW cont_plpgsql_cv;
 
-DROP AGGREGATE set_agg (anyelement);
+DROP AGGREGATE test_set_agg (anyelement);
 DROP FUNCTION set_add (anyarray, anyelement);
 DROP FUNCTION set_merge (anyarray, anyarray);

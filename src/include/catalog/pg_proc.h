@@ -5474,9 +5474,6 @@ DESCR("filtered space saving weighted increment");
 DATA(insert OID = 4417 ( pipeline_exec_adhoc_query PGNSP PGUID 12 1 0 0 0 f f f f t f s 1 0 25 "25" _null_ _null_ _null_ _null_ pipeline_exec_adhoc_query _null_ _null_ _null_ ));
 DESCR("exec adhoc query");
 
-DATA(insert OID = 4418 ( pipeline_unittest PGNSP PGUID 12 1 0 0 0 f f f f t f s 0 0 25 "" _null_ _null_ _null_ _null_ pipeline_unittest _null_ _null_ _null_ ));
-DESCR("pipeline unit tests");
-
 /* stream FDW handler */
 DATA(insert OID = 4419 ( stream_fdw_handler	PGNSP PGUID 12 1 0 0 0 f f f f f f i 0 0 3115 "" _null_ _null_ _null_ _null_ stream_fdw_handler _null_ _null_ _null_ ));
 DESCR("stream FDW handler");
@@ -5571,6 +5568,18 @@ DATA(insert OID = 4461 ( keyed_min_combine	PGNSP PGUID 12 1 0 0 0 f f f f f f i 
 DESCR("keyed min combine function");
 DATA(insert OID = 4462 ( keyed_max_combine	PGNSP PGUID 12 1 0 0 0 f f f f f f i 2 0 17 "17 17" _null_ _null_ _null_ _null_ keyed_max_combine _null_ _null_ _null_ ));
 DESCR("keyed max combine function");
+
+DATA(insert OID = 4463 ( set_agg	PGNSP PGUID 12 1 0 0 0 t f f f t f i 1 0 17 "2283" _null_ _null_ _null_ _null_ aggregate_dummy _null_ _null_ _null_ ));
+DESCR("set aggregate function");
+DATA(insert OID = 4464 ( set_agg_trans	PGNSP PGUID 12 1 0 0 0 f f f f f f i 2 0 2281 "2281 2283" _null_ _null_ _null_ _null_ set_agg_trans _null_ _null_ _null_ ));
+DESCR("set add function");
+DATA(insert OID = 4465 ( set_agg_combine PGNSP PGUID 12 1 0 0 0 f f f f f f i 2 0 17 "17 17" _null_ _null_ _null_ _null_ set_agg_combine _null_ _null_ _null_ ));
+DESCR("set aggregate combine function");
+DATA(insert OID = 4466 ( set_cardinality PGNSP PGUID 12 1 0 0 0 f f f f f f i 1 0 20 "17" _null_ _null_ _null_ _null_ set_cardinality _null_ _null_ _null_ ));
+DESCR("set print function");
+
+DATA(insert OID = 4467 ( exact_count_distinct	PGNSP PGUID 12 1 0 0 0 t f f f t f i 1 0 20 "2283" _null_ _null_ _null_ _null_ aggregate_dummy _null_ _null_ _null_ ));
+DESCR("exact count distinct aggregate");
 
 /*
  * Symbolic values for provolatile column: these indicate whether the result

@@ -285,6 +285,7 @@ UnpackTupleDesc(bytea *bytes)
 	int nbytes;
 	int i;
 	int natts = 0;
+	TupleDesc desc;
 
 	nbytes = VARSIZE(bytes);
 
@@ -305,7 +306,10 @@ UnpackTupleDesc(bytea *bytes)
 		collations = lappend_int(collations, collation);
 	}
 
-	return BuildDescFromLists(names, types, mods, collations);
+	desc = BuildDescFromLists(names, types, mods, collations);
+	pfree(buf.data);
+
+	return desc;
 }
 
 /*
@@ -341,6 +345,8 @@ PackTupleDesc(TupleDesc desc)
 	SET_VARSIZE(result, nbytes + VARHDRSZ);
 
 	pq_copymsgbytes(&buf, VARDATA(result), nbytes);
+
+	pfree(buf.data);
 
 	return result;
 }
@@ -530,37 +536,6 @@ GetAllStreamReaders(Oid relid)
 	return result;
 }
 
-/* 
- * GetAdhocContinuousViewIds
- * 
- * Returns a bitmapset of all the continuous views that 
- * are marked as adhoc.
- */  
-Bitmapset *
-GetAdhocContinuousViewIds(void)
-{
-	Relation pipeline_query = heap_open(PipelineQueryRelationId, AccessShareLock);
-	HeapScanDesc scan_desc = heap_beginscan_catalog(pipeline_query, 0, NULL);
-	HeapTuple tup;
-	Bitmapset *result = NULL;
-
-	while ((tup = heap_getnext(scan_desc, ForwardScanDirection)) != NULL)
-	{
-		Form_pipeline_query row = (Form_pipeline_query) GETSTRUCT(tup);
-		Oid id = row->id;
-
-		if (!row->adhoc)
-			continue;
-
-		result = bms_add_member(result, id);
-	}
-
-	heap_endscan(scan_desc);
-	heap_close(pipeline_query, AccessShareLock);
-
-	return result;
-}
-
 Bitmapset *
 GetLocalStreamReaders(Oid relid)
 {
@@ -640,15 +615,12 @@ GetInferredStreamTupleDesc(Oid relid, List *colnames)
 	Form_pg_attribute *attrs;
 	AttrNumber attno = InvalidAttrNumber;
 	int i;
-	Form_pipeline_stream row;
 	MemoryContext old;
 	TupleDesc result;
 
-	Assert (HeapTupleIsValid(tup));
+	Assert(HeapTupleIsValid(tup));
+	Assert(((Form_pipeline_stream) GETSTRUCT(tup))->inferred);
 
-	row = (Form_pipeline_stream) GETSTRUCT(tup);
-
-	Assert(row->inferred);
 	raw = SysCacheGetAttr(PIPELINESTREAMRELID, tup, Anum_pipeline_stream_desc, &isnull);
 
 	if (isnull)

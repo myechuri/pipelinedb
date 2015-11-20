@@ -77,9 +77,7 @@ get_plan_from_stmt(Oid id, Node *node, const char *sql, bool is_combine)
 
 	plan = pg_plan_query(query, 0, NULL);
 
-	plan->is_continuous = true;
-	plan->is_combine = is_combine;
-	plan->cq_id = id;
+	plan->isContinuous = true;
 
 	/*
 	 * Unique plans get transformed into ContinuousUnique plans for
@@ -202,34 +200,6 @@ get_combiner_plan(ContinuousView *view)
 	return result;
 }
 
-/* util func to set reader on stream scan nodes */ 
-void
-SetTupleBufferBatchReader(PlanState *planstate, TupleBufferBatchReader *reader)
-{
-	if (planstate == NULL)
-		return;
-
-	if (IsA(planstate, ForeignScanState))
-	{
-		ForeignScanState *fss = (ForeignScanState *) planstate;
-		if (IsStream(RelationGetRelid(fss->ss.ss_currentRelation)))
-		{
-			StreamScanState *scan = (StreamScanState *) fss->fdw_state;
-			scan->reader = reader;
-		}
-
-		return;
-	}
-	else if (IsA(planstate, SubqueryScanState))
-	{
-		SetTupleBufferBatchReader(((SubqueryScanState *) planstate)->subplan, reader);
-		return;
-	}
-
-	SetTupleBufferBatchReader(planstate->lefttree, reader);
-	SetTupleBufferBatchReader(planstate->righttree, reader);
-}
-
 PlannedStmt *
 GetContPlan(ContinuousView *view, ContQueryProcType type)
 {
@@ -324,7 +294,7 @@ CreateEState(QueryDesc *query_desc)
 		RegisterSnapshot(query_desc->crosscheck_snapshot);
 	estate->es_instrument = query_desc->instrument_options;
 	estate->es_range_table = query_desc->plannedstmt->rtable;
-	estate->es_continuous = query_desc->plannedstmt->is_continuous;
+	estate->es_continuous = query_desc->plannedstmt->isContinuous;
 	estate->es_lastoid = InvalidOid;
 	estate->es_processed = estate->es_filtered = 0;
 
@@ -339,7 +309,7 @@ CreateEState(QueryDesc *query_desc)
 }
 
 void
-SetEStateSnapshot(EState *estate, ResourceOwner owner)
+SetEStateSnapshot(EState *estate)
 {
 	estate->es_snapshot = GetTransactionSnapshot();
 	estate->es_snapshot->active_count++;
@@ -348,7 +318,7 @@ SetEStateSnapshot(EState *estate, ResourceOwner owner)
 }
 
 void
-UnsetEStateSnapshot(EState *estate, ResourceOwner owner)
+UnsetEStateSnapshot(EState *estate)
 {
 	PopActiveSnapshot();
 	estate->es_snapshot = NULL;
