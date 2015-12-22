@@ -16,3 +16,4 @@ RUN /scripts/install_extras.sh
 EXPOSE 5432
 
 CMD ["/scripts/startpipeline"]
+
